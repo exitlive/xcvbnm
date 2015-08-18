@@ -1,0 +1,10 @@
+name: xcvbnm
+version: 0.0.1
+author: Matias Meno @ Exit Live
+description: An external library that implements https://github.com/dropbox/zxcvbn used by Exit Live as a password strength estimator.
+environment:
+  sdk: '>=1.9.0 <2.0.0'
+dependencies:
+
+dev_dependencies:
+  test: ^0.12.0
