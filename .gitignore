@@ -1,0 +1,14 @@
+.DS_Store
+.pub
+.idea/*
+!.idea/fileColors.xml
+!.idea/scopes
+!.idea/watcherTasks.xml
+packages
+
+*/.pub
+*/.buildlog
+*/.*
+*/!.gitignore
+*/!.rsyncignore
+*/!.dockerignore
