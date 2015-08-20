@@ -12,9 +12,6 @@ class Result {
   // [10**2, 10**4, 10**6, 10**8, Infinity].
   // (useful for implementing a strength bar.)
   int score;
-  // the list of patterns that xcvbnm based the
-  // entropy calculation on.
-  var matchSequence;
   // how long it took xcvbnm to calculate an answer,
   // in milliseconds.
   int calcTime;
