@@ -1,3 +1,6 @@
 # xcvbnm
+--------
+This is intended as a Dart port of zxcvbn (see https://github.com/dropbox/zxcvbn), a realistic password strength 
+estimator.
 
-An external library that implements https://github.com/dropbox/zxcvbn used by Exit Live as a password strength estimator.
+**Please note, that this is currently in development.**
