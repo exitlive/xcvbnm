@@ -188,3 +188,23 @@ num repeatEntropy(Match match) {
   cardinality = calcBruteforceCardinality(match.token);
   return lg(cardinality * match.token.length);
 }
+
+num sequenceEntropy(Match match) {
+  var base_entropy;
+  String first_chr = match.token[0];
+  if (first_chr == 'a' || first_chr == '1') {
+    base_entropy = 1;
+  } else {
+    if (first_chr.startsWith("\d")) {
+      base_entropy = lg(10);
+    } else if (first_chr.startsWith("[a-z]")) {
+      base_entropy = lg(26);
+    } else {
+      base_entropy = lg(26) + 1;
+    }
+  }
+  if (!match.ascending) {
+    base_entropy += 1;
+  }
+  return base_entropy + lg(match.token.length);
+}
