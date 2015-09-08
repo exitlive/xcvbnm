@@ -224,4 +224,124 @@ main() {
     msg = "spatial entropy accounts for turn positions, directions and starting keys";
     expect(spatialEntropy(match), entropy, reason: msg);
   });
+
+  test('dictionaryEntropy', () {
+    var expected, match, msg;
+    match = new Match()
+      ..token = 'aaaaa'
+      ..rank = 32;
+    msg = "base entropy is the lg of the rank";
+    expect(dictionaryEntropy(match), lg(32), reason: msg);
+    match = new Match()
+      ..token = 'AAAaaa'
+      ..rank = 32;
+    msg = "extra entropy is added for capitalization";
+    expect(dictionaryEntropy(match), lg(32) + extraUppercaseEntropy(match), reason: msg);
+    match = new Match()
+      ..token = 'aaa@@@'
+      ..rank = 32
+      ..l33t = true
+      ..sub = {
+      '@': 'a'
+    };
+    msg = "extra entropy is added for common l33t substitutions";
+    expect(dictionaryEntropy(match), lg(32) + extraL33tEntropy(match), reason: msg);
+    match = new Match()
+      ..token = 'AaA@@@'
+      ..rank = 32
+      ..l33t = true
+      ..sub = {
+      '@': 'a'
+    };
+    msg = "extra entropy is added for both capitalization and common l33t substitutions";
+    expected = lg(32) + extraL33tEntropy(match) + extraUppercaseEntropy(match);
+    expect(dictionaryEntropy(match), expected, reason: msg);
+  });
+
+  test('extraUppercaseEntropy', () {
+    var extra_entropy, l, len, msg, ref, ref1, word;
+    ref = [['', 0], ['a', 0], ['A', 1], ['abcdef', 0], ['Abcdef', 1], ['abcdeF', 1], ['ABCDEF', 1], ['aBcdef', lg(nCk(6, 1))], ['aBcDef', lg(nCk(6, 1) + nCk(6, 2))], ['ABCDEf', lg(nCk(6, 1))], ['aBCDEf', lg(nCk(6, 1) + nCk(6, 2))], ['ABCdef', lg(nCk(6, 1) + nCk(6, 2) + nCk(6, 3))]];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      ref1 = ref[l];
+      word = ref1[0];
+      extra_entropy = ref1[1];
+      msg = "extra uppercase entropy of ${word} is ${extra_entropy}";
+      expect(extraUppercaseEntropy(new Match()
+        ..
+      token = word
+      ), extra_entropy, reason: msg);
+    }
+  });
+
+  test('extraL33tEntropy', () {
+    var extra_entropy, l, len, match, msg, ref, ref1, word;
+    Map sub;
+    match = new Match()
+      ..l33t = false;
+    expect(extraL33tEntropy(match), 0, reason: "0 extra entropy for non-l33t matches");
+    ref = [
+      ['', 0, {}], ['a', 0, {}], [
+        '4', 1, {
+          '4': 'a'
+        }
+      ], [
+        '4pple', 1, {
+          '4': 'a'
+        }
+      ], ['abcet', 0, {}], [
+        '4bcet', 1, {
+          '4': 'a'
+        }
+      ], [
+        'a8cet', 1, {
+          '8': 'b'
+        }
+      ], [
+        'abce+', 1, {
+          '+': 't'
+        }
+      ], [
+        '48cet', 2, {
+          '4': 'a',
+          '8': 'b'
+        }
+      ], [
+        'a4a4aa', lg(nCk(6, 2) + nCk(6, 1)), {
+          '4': 'a'
+        }
+      ], [
+        '4a4a44', lg(nCk(6, 2) + nCk(6, 1)), {
+          '4': 'a'
+        }
+      ], [
+        'a44att+', lg(nCk(4, 2) + nCk(4, 1)) + lg(nCk(3, 1)), {
+          '4': 'a',
+          '+': 't'
+        }
+      ]
+    ];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      ref1 = ref[l];
+      word = ref1[0];
+      extra_entropy = ref1[1];
+      sub = ref1[2];
+      match = new Match()
+        ..token = word
+        ..sub = sub
+        ..l33t = sub.isNotEmpty;
+      msg = "extra l33t entropy of ${word} is ${extra_entropy}";
+      expect(extraL33tEntropy(match), extra_entropy, reason: msg);
+    }
+    match = new Match()
+      ..token = 'Aa44aA'
+      ..l33t = true
+      ..sub = {
+      '4': 'a'
+    };
+    extra_entropy = lg(nCk(6, 2) + nCk(6, 1));
+    msg = "capitalization doesn't affect extra l33t entropy calc";
+    expect(extraL33tEntropy(match), extra_entropy, reason: msg);
+  });
 }

@@ -2,7 +2,6 @@ library xcvbnm.scoring;
 
 import 'dart:math' as math;
 import "adjacency_graphs.dart";
-//import '../xcvbnm.dart';
 
 const num _secondsPerGuess = .010 / 100;
 const int minYearSpace = 20;
@@ -161,11 +160,12 @@ String displayTime(num seconds) {
 class Match {
   String pattern;
 
+  num entropy;
+
   // date entropy
   int year;
   int month;
   int day;
-  num entropy;
 
   // ?? never used
   bool hasFullYear = false;
@@ -181,10 +181,18 @@ class Match {
   String regexName;
   List<String> regexMatch;
 
-  // spacial
+  // spatial
   String graph;
   int shiftedCount;
   int turns;
+
+  // dictionary
+  int rank;
+  num baseEntropy;
+  num uppercaseEntropy;
+  bool l33t = false;
+  num l33tEntropy;
+  Map sub;
 }
 
 num repeatEntropy(Match match) {
@@ -328,4 +336,115 @@ num spatialEntropy(Match match) {
     }
   }
   return entropy;
+}
+
+num dictionaryEntropy(Match match) {
+  match.baseEntropy = lg(match.rank);
+  match.uppercaseEntropy = extraUppercaseEntropy(match);
+  match.l33tEntropy = extraL33tEntropy(match);
+  return match.baseEntropy + match.uppercaseEntropy + match.l33tEntropy;
+}
+
+var _startUpperRegExp = new RegExp(r"^[A-Z][^A-Z]+$");
+var _endUpperRegExp = new RegExp(r"^[^A-Z]+[A-Z]$");
+var _allUpperRegExp = new RegExp(r"^[^a-z]+$");
+var _allLowerRegExp = new RegExp(r"^[^A-Z]+$");
+
+num extraUppercaseEntropy(Match match) {
+  var L, U, chr, i, l, len, m, possibilities, ref, ref1, regex;
+  String word = match.token;
+  if (_allLowerRegExp.hasMatch(word)) {
+    return 0;
+  }
+  ref = [_startUpperRegExp, _endUpperRegExp, _allUpperRegExp];
+  len = ref.length;
+  for (l = 0; l < len; l++) {
+    regex = ref[l];
+    if (regex.hasMatch(word)) {
+      return 1;
+    }
+  }
+  U = ((() {
+    var len1, m, ref1, results;
+    ref1 = word.split('');
+    results = [];
+    len1 = ref1.length;
+    for (m = 0; m < len1; m++) {
+      chr = ref1[m];
+      if (new RegExp("[A-Z]").hasMatch(chr)) {
+        results.add(chr);
+      }
+    }
+    return results;
+  })()).length;
+  L = ((() {
+    var len1, m, ref1, results;
+    ref1 = word.split('');
+    results = [];
+    len1 = ref1.length;
+    for (m = 0; m < len1; m++) {
+      chr = ref1[m];
+      if (new RegExp("[a-z]").hasMatch(chr)) {
+        results.add(chr);
+      }
+    }
+    return results;
+  })()).length;
+  possibilities = 0;
+  i = 1;
+  ref1 = math.min(U, L);
+  for (m = 1; 1 <= ref1 ? m <= ref1 : m >= ref1; i = 1 <= ref1 ? ++m : --m) {
+    possibilities += nCk(U + L, i);
+  }
+  return lg(possibilities);
+}
+
+num extraL33tEntropy(Match match) {
+  var S, U, chr, chrs, extra_entropy, i, l, p, possibilities, ref1, subbed, unsubbed;
+  if (!match.l33t) {
+    return 0;
+  }
+  extra_entropy = 0;
+  Map ref = match.sub;
+  for (subbed in ref.keys) {
+    unsubbed = ref[subbed];
+    chrs = match.token.toLowerCase().split('');
+    S = ((() {
+      var l, len, results;
+      results = [];
+      len = chrs.length;
+      for (l = 0; l < len; l++) {
+        chr = chrs[l];
+        if (chr == subbed) {
+          results.add(chr);
+        }
+      }
+      return results;
+    })()).length;
+    U = ((() {
+      var l, len, results;
+      results = [];
+      len = chrs.length;
+      for (l = 0; l < len; l++) {
+        chr = chrs[l];
+        if (chr == unsubbed) {
+          results.add(chr);
+        }
+      }
+      return results;
+    })()).length;
+    if (S == 0 || U == 0) {
+      extra_entropy += 1;
+    } else {
+      p = math.min(U, S);
+      possibilities = 0;
+      i = 1;
+      ref1 = p;
+      for (l = 1; 1 <= ref1 ? l <= ref1 : l >= ref1; i = 1 <= ref1 ? ++l : --l) {
+        possibilities += nCk(U + S, i);
+      }
+      extra_entropy += lg(possibilities);
+    }
+  }
+  return extra_entropy;
 }
