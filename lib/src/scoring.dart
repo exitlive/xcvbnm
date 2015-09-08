@@ -32,3 +32,19 @@ num lg(num n) {
 num entropyToCrackTime(num entropy) {
   return .5 * math.pow(2, entropy) * _secondsPerGuess;
 }
+
+int crackTimeToScore(seconds) {
+  if (seconds < math.pow(10, 2)) {
+    return 0;
+  }
+  if (seconds < math.pow(10, 4)) {
+    return 1;
+  }
+  if (seconds < math.pow(10, 6)) {
+    return 2;
+  }
+  if (seconds < math.pow(10, 8)) {
+    return 3;
+  }
+  return 4;
+}

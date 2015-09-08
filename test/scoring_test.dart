@@ -66,4 +66,17 @@ main() {
       expect(e, greaterThan(0), reason: "always positive");
     }
   });
+
+  test('crackTimeToScore', () {
+    var l, len, msg, ref, ref1, score, seconds;
+    ref = [[0, 0], [10, 0], [math.pow(10, 9), 4]];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      ref1 = ref[l];
+      seconds = ref1[0];
+      score = ref1[1];
+      msg = "crack time of ${seconds} seconds has score of ${score}";
+      expect(crackTimeToScore(seconds), score, reason: msg);
+    }
+  });
 }
