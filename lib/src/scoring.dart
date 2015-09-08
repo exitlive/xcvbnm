@@ -48,3 +48,72 @@ int crackTimeToScore(seconds) {
   }
   return 4;
 }
+
+int calcBruteforceCardinality(String password) {
+  var c, cp, digits, l, latin1_letters, latin1_symbols, len, len1, lower, m, max_cp, min_cp, ord, range, ref1, ref2, symbols, upper;
+
+  List unicode_codepoints = [];
+  ref1 = password.split('');
+  len = ref1.length;
+  for (l = 0; l < len; l++) {
+    String chr = ref1[l];
+    ord = chr.codeUnitAt(0);
+    if ((0x30 <= ord && ord <= 0x39)) {
+      digits = true;
+    } else if ((0x41 <= ord && ord <= 0x5a)) {
+      upper = true;
+    } else if ((0x61 <= ord && ord <= 0x7a)) {
+      lower = true;
+    } else if (ord <= 0x7f) {
+      symbols = true;
+    } else if ((0x80 <= ord && ord <= 0xBF)) {
+      latin1_symbols = true;
+    } else if ((0xC0 <= ord && ord <= 0xFF)) {
+      latin1_letters = true;
+    } else if (ord > 0xFF) {
+      unicode_codepoints.add(ord);
+    }
+  }
+  c = 0;
+  if (digits == true) {
+    c += 10;
+  }
+  if (upper == true) {
+    c += 26;
+  }
+  if (lower == true) {
+    c += 26;
+  }
+  if (symbols == true) {
+    c += 33;
+  }
+  if (latin1_symbols == true) {
+    c += 64;
+  }
+  if (latin1_letters == true) {
+    c += 64;
+  }
+  if (unicode_codepoints.length > 0) {
+    min_cp = max_cp = unicode_codepoints[0];
+    ref2 = unicode_codepoints.sublist(1);
+    len1 = ref2.length;
+    for (m = 0; m < len1; m++) {
+      cp = ref2[m];
+      if (cp < min_cp) {
+        min_cp = cp;
+      }
+      if (cp > max_cp) {
+        max_cp = cp;
+      }
+    }
+    range = max_cp - min_cp + 1;
+    if (range < 40) {
+      range = 40;
+    }
+    if (range > 100) {
+      range = 100;
+    }
+    c += range;
+  }
+  return c;
+}

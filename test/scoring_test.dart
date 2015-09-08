@@ -79,4 +79,17 @@ main() {
       expect(crackTimeToScore(seconds), score, reason: msg);
     }
   });
+
+  test('calcBruteforceCardinality', () {
+    var cardinality, l, len, msg, ref, ref1, str;
+    ref = [['a', 26], ['h', 26], ['z', 26], ['Q', 26], ['0', 10], ['9', 10], ['\$', 33], ['£', 64], ['å', 64], ['α', 40], ['αβ', 40], ['Ϫα', 58], ['好', 40], ['信息论', 100], ['a\$', 59], ['aQ£', 116], ['9Z9Z', 36], ['«信息论»', 164]];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      ref1 = ref[l];
+      str = ref1[0];
+      cardinality = ref1[1];
+      msg = "cardinality of ${str} is ${cardinality}";
+      expect(calcBruteforceCardinality(str), cardinality, reason: msg);
+    }
+  });
 }
