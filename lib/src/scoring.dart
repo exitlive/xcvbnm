@@ -204,12 +204,12 @@ num repeatEntropy(Match match) {
 num sequenceEntropy(Match match) {
   var base_entropy;
   String first_chr = match.token[0];
-  if (first_chr == 'a' || first_chr == '1') {
+  if (['a', '1'].contains(first_chr)) {
     base_entropy = 1;
   } else {
-    if (first_chr.startsWith("\d")) {
+    if (new RegExp(r"\d").hasMatch(first_chr)) {
       base_entropy = lg(10);
-    } else if (first_chr.startsWith("[a-z]")) {
+    } else if (new RegExp(r"[a-z]").hasMatch(first_chr)) {
       base_entropy = lg(26);
     } else {
       base_entropy = lg(26) + 1;
@@ -371,7 +371,7 @@ num extraUppercaseEntropy(Match match) {
     len1 = ref1.length;
     for (m = 0; m < len1; m++) {
       chr = ref1[m];
-      if (new RegExp("[A-Z]").hasMatch(chr)) {
+      if (new RegExp(r"[A-Z]").hasMatch(chr)) {
         results.add(chr);
       }
     }
@@ -384,7 +384,7 @@ num extraUppercaseEntropy(Match match) {
     len1 = ref1.length;
     for (m = 0; m < len1; m++) {
       chr = ref1[m];
-      if (new RegExp("[a-z]").hasMatch(chr)) {
+      if (new RegExp(r"[a-z]").hasMatch(chr)) {
         results.add(chr);
       }
     }
