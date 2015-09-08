@@ -5,10 +5,11 @@
 !.idea/scopes
 !.idea/watcherTasks.xml
 packages
+.packages
+pubspec.lock
 
 */.pub
 */.buildlog
-*/.*
 */!.gitignore
 */!.rsyncignore
 */!.dockerignore
