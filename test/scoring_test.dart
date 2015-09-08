@@ -105,4 +105,19 @@ main() {
       expect(displayTime(seconds), display, reason: msg);
     }
   });
+
+  test('repeatEntropy', () {
+    var entropy, l, len, match, msg, ref, ref1, token;
+    ref = [['aa', lg(26 * 2)], ['999', lg(10 * 3)], ['\$\$\$\$', lg(33 * 4)]];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      ref1 = ref[l];
+      token = ref1[0];
+      entropy = ref1[1];
+      match = new Match()
+        ..token = token;
+      msg = "the repeat pattern '${token}' has entropy of ${entropy}";
+      expect(repeatEntropy(match), entropy, reason: msg);
+    }
+  });
 }

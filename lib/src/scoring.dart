@@ -153,3 +153,38 @@ String displayTime(num seconds) {
   }
   return display_str;
 }
+
+class Match {
+  String pattern;
+
+  // date entropy
+  int year;
+  int month;
+  int day;
+  num entropy;
+
+  // ?? never used
+  bool hasFullYear = false;
+  String separator;
+
+  // repeat/sequence/regex/spatial entropy
+  String token;
+
+  // sequence entropy
+  bool ascending;
+
+  // regex
+  String regexName;
+  List<String> regexMatch;
+
+  // spacial
+  String graph;
+  int shiftedCount;
+  int turns;
+}
+
+num repeatEntropy(Match match) {
+  var cardinality;
+  cardinality = calcBruteforceCardinality(match.token);
+  return lg(cardinality * match.token.length);
+}
