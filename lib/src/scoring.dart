@@ -1,5 +1,7 @@
 library xcvbnm.scoring;
 
+import 'dart:math' as math;
+
 num nCk(n, k) {
   var d, l, r, ref;
   if (k > n) {
@@ -19,4 +21,8 @@ num nCk(n, k) {
     n -= 1;
   }
   return r;
+}
+
+num lg(num n) {
+  return math.log(n) / math.log(2);
 }
