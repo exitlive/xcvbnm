@@ -117,3 +117,39 @@ int calcBruteforceCardinality(String password) {
   }
   return c;
 }
+
+String displayTime(num seconds) {
+  var base, century, day, display_num, display_str, hour, minute, month, ref, year;
+  minute = 60;
+  hour = minute * 60;
+  day = hour * 24;
+  month = day * 31;
+  year = month * 12;
+  century = year * 100;
+  if (seconds < minute) {
+    ref = [seconds, "${seconds} second"];
+  } else if (seconds < hour) {
+    base = (seconds / minute).round();
+    ref = [base, "${base} minute"];
+  } else if (seconds < day) {
+    base = (seconds / hour).round();
+    ref = [base, "${base} hour"];
+  } else if (seconds < month) {
+    base = (seconds / day).round();
+    ref = [base, "${base} day"];
+  } else if (seconds < year) {
+    base = (seconds / month).round();
+    ref = [base, "${base} month"];
+  } else if (seconds < century) {
+    base = (seconds / year).round();
+    ref = [base, "${base} year"];
+  } else {
+    ref = [null, 'centuries'];
+  }
+  display_num = ref[0];
+  display_str = ref[1];
+  if ((display_num != null) && display_num != 1) {
+    display_str += 's';
+  }
+  return display_str;
+}

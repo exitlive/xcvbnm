@@ -92,4 +92,17 @@ main() {
       expect(calcBruteforceCardinality(str), cardinality, reason: msg);
     }
   });
+
+  test('displayTime', () {
+    var display, l, len, msg, ref, ref1, seconds;
+    ref = [[0, '0 seconds'], [1, '1 second'], [32, '32 seconds'], [60, '1 minute'], [121, '2 minutes'], [3600, '1 hour'], [2 * 3600 * 24 + 5, '2 days'], [1 * 3600 * 24 * 31 + 4000, '1 month'], [99 * 3600 * 24 * 31 * 12, '99 years'], [math.pow(10, 10), 'centuries']];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      ref1 = ref[l];
+      seconds = ref1[0];
+      display = ref1[1];
+      msg = "${seconds} seconds has a display time of ${display}";
+      expect(displayTime(seconds), display, reason: msg);
+    }
+  });
 }
