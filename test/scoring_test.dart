@@ -144,4 +144,31 @@ main() {
       expect(sequenceEntropy(match), entropy, reason: msg);
     }
   });
+
+  test('regexEntropy', () {
+    var match;
+    match = new Match()
+      ..token = 'aizocdk'
+      ..regexName = 'alpha_lower'
+      ..regexMatch = ['aizocdk'];
+
+    expect(regexEntropy(match), lg(math.pow(26, 7)));
+    match = new Match()
+      ..token = 'ag7C8'
+      ..regexName = 'alphanumeric'
+      ..regexMatch = ['ag7C8'];
+    expect(regexEntropy(match), lg(math.pow(2 * 26 + 10, 5)));
+    match = new Match()
+      ..token = '1972'
+      ..regexName = 'recent_year'
+      ..regexMatch = ['1972'];
+
+    expect(regexEntropy(match), lg(referenceYear - 1972));
+    match = new Match()
+      ..token = '1992'
+      ..regexName = 'recent_year'
+      ..regexMatch = ['1992'];
+
+    expect(regexEntropy(match), lg(minYearSpace));
+  });
 }

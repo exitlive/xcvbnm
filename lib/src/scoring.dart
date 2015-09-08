@@ -3,6 +3,8 @@ library xcvbnm.scoring;
 import 'dart:math' as math;
 
 const num _secondsPerGuess = .010 / 100;
+const int minYearSpace = 20;
+const int referenceYear = 2000;
 
 num nCk(n, k) {
   var d, l, r, ref;
@@ -207,4 +209,26 @@ num sequenceEntropy(Match match) {
     base_entropy += 1;
   }
   return base_entropy + lg(match.token.length);
+}
+
+num regexEntropy(Match match) {
+  var year_space;
+  Map char_class_bases = {
+    "alpha_lower": 26,
+    "alpha_upper": 26,
+    "alpha": 52,
+    "alphanumeric": 62,
+    "digits": 10,
+    "symbols": 33
+  };
+  if (char_class_bases.containsKey(match.regexName)) {
+    return lg(math.pow(char_class_bases[match.regexName], match.token.length));
+  } else {
+    switch (match.regexName) {
+      case 'recent_year':
+        year_space = (int.parse(match.regexMatch[0]) - referenceYear).abs();
+        year_space = math.max(year_space, minYearSpace);
+        return lg(year_space);
+    }
+  }
 }
