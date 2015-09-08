@@ -171,4 +171,57 @@ main() {
 
     expect(regexEntropy(match), lg(minYearSpace));
   });
+
+  test('_calcAverageDegree', () {
+    expect(keyboardAverageDegree, closeTo(4.595744680851064, epsilon));
+    expect(keyboardStartingPositions, 94);
+    expect(keypadAverageDegree, closeTo(5.066666666666666, epsilon));
+    expect(keypadStartingPositions, 15);
+  });
+
+  test('spatialEntropy', () {
+    var L, base_entropy, d, entropy, i, j, l, msg, o, possibilities, ref, ref1, s, shifted_entropy;
+    Match match = new Match()
+      ..token = 'zxcvbn'
+      ..graph = 'qwerty'
+      ..turns = 1
+      ..shiftedCount = 0;
+    base_entropy = lg(keyboardStartingPositions * keyboardAverageDegree * (match.token.length - 1));
+    msg = "with no turns or shifts, entropy is lg(starts * degree * (len-1))";
+    expect(spatialEntropy(match), base_entropy, reason: msg);
+
+    match.entropy = null;
+    match.token = 'ZxCvbn';
+    match.shiftedCount = 2;
+    shifted_entropy = base_entropy + lg(nCk(6, 2) + nCk(6, 1));
+    msg = "entropy is added for shifted keys, similar to capitals in dictionary matching";
+    expect(spatialEntropy(match), shifted_entropy, reason: msg);
+    match.entropy = null;
+    match.token = 'ZXCVBN';
+    match.shiftedCount = 6;
+    shifted_entropy = base_entropy + 1;
+    msg = "when everything is shifted, only 1 bit is added";
+    expect(spatialEntropy(match), shifted_entropy, reason: msg);
+    match = new Match()
+      ..token = 'zxcft6yh'
+      ..graph = 'qwerty'
+      ..turns = 3
+      ..shiftedCount = 0;
+    possibilities = 0;
+    L = match.token.length;
+    s = keyboardStartingPositions;
+    d = keyboardAverageDegree;
+    i = 2;
+    ref = L;
+    for (l = 2; 2 <= ref ? l <= ref : l >= ref; i = 2 <= ref ? ++l : --l) {
+      j = 1;
+      ref1 = math.min(match.turns, i - 1);
+      for (o = 1; 1 <= ref1 ? o <= ref1 : o >= ref1; j = 1 <= ref1 ? ++o : --o) {
+        possibilities += nCk(i - 1, j - 1) * s * math.pow(d, j);
+      }
+    }
+    entropy = lg(possibilities);
+    msg = "spatial entropy accounts for turn positions, directions and starting keys";
+    expect(spatialEntropy(match), entropy, reason: msg);
+  });
 }

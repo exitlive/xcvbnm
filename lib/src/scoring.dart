@@ -1,6 +1,8 @@
 library xcvbnm.scoring;
 
 import 'dart:math' as math;
+import "adjacency_graphs.dart";
+//import '../xcvbnm.dart';
 
 const num _secondsPerGuess = .010 / 100;
 const int minYearSpace = 20;
@@ -231,4 +233,99 @@ num regexEntropy(Match match) {
         return lg(year_space);
     }
   }
+  return null;
+}
+
+_calcAverageDegree(Map graph) {
+  var average, k, key, n, neighbors;
+  average = 0;
+  for (key in graph.keys) {
+    neighbors = graph[key];
+    average += ((() {
+      var l, len, results;
+      results = [];
+      len = neighbors.length;
+      for (l = 0; l < len; l++) {
+        n = neighbors[l];
+        if (n != null) {
+          results.add(n);
+        }
+      }
+      return results;
+    })()).length;
+  }
+  average /= ((() {
+    var results;
+    results = [];
+    for (k in graph.keys) {
+      //v = graph[k];
+      results.add(k);
+    }
+    return results;
+  })()).length;
+  return average;
+}
+
+final num keyboardAverageDegree = _calcAverageDegree(adjacencyGraphs.qwerty);
+final num keypadAverageDegree = _calcAverageDegree(adjacencyGraphs.keypad);
+final num keyboardStartingPositions = ((() {
+  var ref, results;
+  ref = adjacencyGraphs.qwerty;
+  results = [];
+  for (var k in ref.keys) {
+    //v = ref[k];
+    results.add(k);
+  }
+  return results;
+})()).length;
+final num keypadStartingPositions = ((() {
+  var results;
+  Map ref = adjacencyGraphs.keypad;
+  results = [];
+  for (var k in ref.keys) {
+    //v = ref[k];
+    results.add(k);
+  }
+  return results;
+})()).length;
+
+num spatialEntropy(Match match) {
+  var L, S, U, d, entropy, i, j, l, m, o, possibilities, possible_turns, ref, ref1, ref2, ref3, s, t;
+  if ((ref = match.graph) == 'qwerty' || ref == 'dvorak') {
+    s = keyboardStartingPositions;
+    d = keyboardAverageDegree;
+  } else {
+    s = keypadStartingPositions;
+    d = keypadAverageDegree;
+  }
+  possibilities = 0;
+  L = match.token.length;
+  t = match.turns;
+  i = 2;
+  ref1 = L;
+  for (l = 2; 2 <= ref1 ? l <= ref1 : l >= ref1; i = (2 <= ref1 ? ++l : --l)) {
+    possible_turns = math.min(t, i - 1);
+    j = 1;
+    ref2 = possible_turns;
+    for (m = 1; 1 <= ref2 ? m <= ref2 : m >= ref2; j = (1 <= ref2 ? ++m : --m)) {
+      possibilities += nCk(i - 1, j - 1) * s * math.pow(d, j);
+    }
+  }
+  entropy = lg(possibilities);
+  if (match.shiftedCount != null && match.shiftedCount > 0) {
+    S = match.shiftedCount;
+    U = match.token.length - match.shiftedCount;
+    if (U == 0) {
+      entropy += 1;
+    } else {
+      possibilities = 0;
+      i = 1;
+      ref3 = math.min(S, U);
+      for (o = 1; 1 <= ref3 ? o <= ref3 : o >= ref3; i = (1 <= ref3 ? ++o : --o)) {
+        possibilities += nCk(S + U, i);
+      }
+      entropy += lg(possibilities);
+    }
+  }
+  return entropy;
 }
