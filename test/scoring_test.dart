@@ -124,10 +124,10 @@ main() {
   test('sequenceEntropy', () {
     var ascending, entropy, l, len, match, msg, ref, ref1, token;
     ref = [
-      //['ab', true, lg(26) + lg(2)],
+      ['ab', true, lg(26) + lg(2)],
       ['XYZ', true, lg(26) + 1 + lg(3)],
-      //['4567', true, lg(10) + lg(4)],
-      //['7654', false, lg(10) + lg(4) + 1],
+      ['4567', true, lg(10) + lg(4)],
+      ['7654', false, lg(10) + lg(4) + 1],
       ['ZYX', false, lg(26) + 1 + lg(3) + 1]];
     len = ref.length;
     for (l = 0; l < len; l++) {
@@ -138,9 +138,7 @@ main() {
       match = new Match()
         ..token = token
         .. ascending = ascending;
-
       msg = "the sequence pattern '${token}' has entropy of ${entropy}";
-      // ? report issue to DROPBOX
       expect(sequenceEntropy(match), entropy, reason: msg);
     }
   });
