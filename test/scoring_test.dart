@@ -44,4 +44,26 @@ main() {
     expect(lg(math.pow(n, p)), closeTo(p * lg(n), epsilon), reason: "power rule");
     expect(lg(n), closeTo(math.log(n) / math.log(2), epsilon), reason: "base change rule");
   });
+
+  test('entropyToCrackTime', () {
+    var e, e0, e1, e2, e3, l, len, n, ref;
+    var results;
+    ref = [0, 1, 7, 60];
+    results = [];
+    len = ref.length;
+    for (l = 0; l < len; l++) {
+      n = ref[l];
+      results.add(entropyToCrackTime(n));
+    }
+    e0 = ref[0];
+    e1 = ref[1];
+    e2 = ref[2];
+    e3 = ref[3];
+
+    expect(e0 < e1 && e1 < e2 && e2 < e3, isTrue, reason: "monotonically increasing");
+    for (l = 0; l < len; l++) {
+      e = results[l];
+      expect(e, greaterThan(0), reason: "always positive");
+    }
+  });
 }

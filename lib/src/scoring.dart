@@ -2,6 +2,8 @@ library xcvbnm.scoring;
 
 import 'dart:math' as math;
 
+const num _secondsPerGuess = .010 / 100;
+
 num nCk(n, k) {
   var d, l, r, ref;
   if (k > n) {
@@ -25,4 +27,8 @@ num nCk(n, k) {
 
 num lg(num n) {
   return math.log(n) / math.log(2);
+}
+
+num entropyToCrackTime(num entropy) {
+  return .5 * math.pow(2, entropy) * _secondsPerGuess;
 }
