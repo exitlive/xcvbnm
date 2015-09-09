@@ -2,6 +2,7 @@ library xcvbnm.scoring;
 
 import 'dart:math' as math;
 import "adjacency_graphs.dart";
+import "../xcvbnm.dart" as xcvbnm;
 
 const num _secondsPerGuess = .010 / 100;
 const int minYearSpace = 20;
@@ -157,7 +158,7 @@ String displayTime(num seconds) {
   return display_str;
 }
 
-class Match {
+class Match extends xcvbnm.Match {
   String pattern;
 
   num entropy;
@@ -195,8 +196,9 @@ class Match {
   Map sub;
 
   // match sequence
-  var i;
-  var j;
+  int i;
+  int j;
+  int cardinality;
 }
 
 typedef num _EntropyFunction(Match match);
@@ -481,4 +483,99 @@ num extraL33tEntropy(Match match) {
     }
   }
   return extra_entropy;
+}
+
+xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) {
+  var bruteforce_cardinality, candidate_entropy, crack_time, i, j, k, len, len1, m, make_bruteforce_match, match, match_sequence_copy, min_entropy, o, ref2, up_to_k;
+  List<Match> match_sequence;
+  bruteforce_cardinality = calcBruteforceCardinality(password);
+
+  _safeArrayValue(List array, int index) {
+    if ((index < 0) || (index >= array.length)) {
+      return 0;
+    }
+    var value = array[index];
+    if (value == null) {
+      value = 0;
+    }
+    return value;
+  }
+
+  int passwordLength = password.length;
+  up_to_k = new List(passwordLength);
+  List<Match> backpointers = new List(passwordLength);
+
+  for (k = 0; k < passwordLength; k++) {
+    up_to_k[k] = _safeArrayValue(up_to_k, k - 1) + lg(bruteforce_cardinality);
+    backpointers[k] = null;
+    len = matches.length;
+    for (m = 0; m < len; m++) {
+      match = matches[m];
+      if (!(match.j == k)) {
+        continue;
+      }
+      i = match.i;
+      j = match.j;
+
+      candidate_entropy = _safeArrayValue(up_to_k, i - 1) + calcEntropy(match);
+      if (candidate_entropy < up_to_k[j]) {
+        up_to_k[j] = candidate_entropy;
+        backpointers[j] = match;
+      }
+    }
+  }
+  match_sequence = [];
+  k = passwordLength - 1;
+  while (k >= 0) {
+    match = backpointers[k];
+    if (match != null) {
+      match_sequence.add(match);
+      k = match.i - 1;
+    } else {
+      k -= 1;
+    }
+  }
+  match_sequence = new List.from(match_sequence.reversed);
+  make_bruteforce_match = (() {
+    return (i, j) {
+      return new Match()
+        ..pattern = 'bruteforce'
+        ..i = i
+        ..j = j
+        ..token = password.substring(i, j + 1)
+        ..entropy = lg(math.pow(bruteforce_cardinality, j - i + 1))
+        ..cardinality = bruteforce_cardinality;
+    };
+  })();
+  k = 0;
+  match_sequence_copy = [];
+  len1 = match_sequence.length;
+  for (o = 0; o < len1; o++) {
+    match = match_sequence[o];
+    ref2 = [match.i, match.j];
+    i = ref2[0];
+    j = ref2[1];
+    if (i - k > 0) {
+      match_sequence_copy.add(make_bruteforce_match(k, i - 1));
+    }
+    k = j + 1;
+    match_sequence_copy.add(match);
+  }
+  if (k < password.length) {
+    match_sequence_copy.add(make_bruteforce_match(k, password.length - 1));
+  }
+  match_sequence = match_sequence_copy;
+  min_entropy = _safeArrayValue(up_to_k, password.length - 1);
+  crack_time = entropyToCrackTime(min_entropy);
+  return new xcvbnm.Result()
+    ..password = password
+    ..entropy = round_to_x_digits(min_entropy, 3)
+    ..matchSequence = match_sequence
+    ..crackTime = round_to_x_digits(crack_time, 3)
+    ..crackTimeDisplay = displayTime(crack_time)
+    ..score = crackTimeToScore(crack_time);
+}
+
+int round_to_x_digits(n, x) {
+  return ((n * math.pow(10, x)) / math.pow(10, x)).round();
 }
