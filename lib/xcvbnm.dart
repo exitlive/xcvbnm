@@ -1,20 +1,34 @@
 library xcvbnm;
 
+abstract class Match {
+
+}
+
 class Result {
+  // password
+  String password;
+
   // bits
-  double entropy;
+  num entropy;
+
   // estimation of actual crack time, in seconds.
-  double crackTime;
+  num crackTime;
+
   // same crack time, as a friendlier string:
   // "instant", "6 minutes", "centuries", etc.
   String crackTimeDisplay;
+
   // [0,1,2,3,4] if crack time is less than
   // [10**2, 10**4, 10**6, 10**8, Infinity].
   // (useful for implementing a strength bar.)
   int score;
+
   // how long it took xcvbnm to calculate an answer,
   // in milliseconds.
   int calcTime;
+
+  // match sequence
+  List<Match> matchSequence;
 }
 
 class Xcvbnm {
@@ -28,6 +42,7 @@ class Xcvbnm {
   }
 
   Result estimate(String password, {List<String> userInputs}) {
-    return new Result()..score = getNaiveScore(password);
+    return new Result()
+      ..score = getNaiveScore(password);
   }
 }
