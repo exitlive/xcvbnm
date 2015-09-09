@@ -106,6 +106,20 @@ main() {
     }
   });
 
+  test('calcEntropy', () {
+    var match, msg;
+    match = new Match()
+      ..entropy = 1;
+    expect(calcEntropy(match), 1, reason: "calc_entropy returns cached entropy when available");
+    match = new Match()
+      ..pattern = 'date'
+      ..year = 1977
+      ..month = 7
+      .. day = 14;
+    msg = "calc_entropy delegates based on pattern";
+    expect(calcEntropy(match), dateEntropy(match), reason: msg);
+  });
+
   test('repeatEntropy', () {
     var entropy, l, len, match, msg, ref, ref1, token;
     ref = [['aa', lg(26 * 2)], ['999', lg(10 * 3)], ['\$\$\$\$', lg(33 * 4)]];
@@ -168,6 +182,29 @@ main() {
       ..regexMatch = ['1992'];
 
     expect(regexEntropy(match), lg(minYearSpace));
+  });
+
+  test('dateEntropy', () {
+    var match, msg;
+    match = new Match()
+      ..token = '1123'
+      ..separator = ''
+      ..hasFullYear = false
+      ..year = 1923
+      ..month = 1
+      ..day = 1;
+    msg = "entropy for ${match.token} is lg days * months * distance_from_ref_year";
+    expect(dateEntropy(match), lg(12 * 31 * (referenceYear - match.year)), reason: msg);
+    match = new Match()
+      ..token = '1/1/2010'
+      ..separator = '/'
+      ..hasFullYear = true
+      ..year = 2010
+      ..month = 1
+      ..day = 1;
+    msg = "recent years assume MIN_YEAR_SPACE.";
+    msg += " extra entropy is added for separators and a 4-digit year.";
+    expect(dateEntropy(match), lg(12 * 31 * minYearSpace) + 2 + 1, reason: msg);
   });
 
   test('_calcAverageDegree', () {

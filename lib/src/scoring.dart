@@ -193,6 +193,40 @@ class Match {
   bool l33t = false;
   num l33tEntropy;
   Map sub;
+
+  // match sequence
+  var i;
+  var j;
+}
+
+typedef num _EntropyFunction(Match match);
+
+num calcEntropy(Match match) {
+  if (match.entropy != null) {
+    return match.entropy;
+  }
+  Map<String, _EntropyFunction> entropy_functions = {
+    "dictionary": dictionaryEntropy,
+    "spatial": spatialEntropy,
+    "repeat": repeatEntropy,
+    "sequence": sequenceEntropy,
+    "regex": regexEntropy,
+    "date": dateEntropy
+  };
+  return match.entropy = entropy_functions[match.pattern](match);
+}
+
+num dateEntropy(Match match) {
+  var entropy, year_space;
+  year_space = math.max((match.year - referenceYear).abs(), minYearSpace);
+  entropy = lg(year_space * 31 * 12);
+  if (match.hasFullYear) {
+    entropy += 1;
+  }
+  if (match.separator != null && match.separator.length > 0) {
+    entropy += 2;
+  }
+  return entropy;
 }
 
 num repeatEntropy(Match match) {
