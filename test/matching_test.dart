@@ -9,8 +9,6 @@ main() {
     var chr_map,
         dividend,
         divisor,
-        l,
-        len2,
         lst,
         lst1,
         lst2,
@@ -22,17 +20,9 @@ main() {
         m6,
         map,
         msg,
-        n,
-        o,
-        obj,
-        ref,
         ref1,
         ref2,
-        ref3,
         ref4,
-        ref5,
-        ref6,
-        ref7,
         remainder,
         result,
         string;
@@ -147,79 +137,72 @@ main() {
     expect(sorted([m1, m2, m3, m4, m5, m6]), [m4, m6, m5, m3, m1, m2], reason: msg);
   });
 
-  genpws(pattern, prefixes, suffixes) {
-    var i, j, l, len, len1, len2, lst, n, o, prefix, ref, ref1, result, suffix;
-    prefixes = new List.from(prefixes);
-    suffixes = new List.from(suffixes);
-    ref = [prefixes, suffixes];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      List lst = ref[l];
+  // takes a pattern and list of prefixes/suffixes
+  // returns a bunch of variants of that pattern embedded
+  // with each possible prefix/suffix combination, including no prefix/suffix
+  // returns a list of triplets [variant, i, j] where [i,j] is the start/end of the pattern, inclusive
+  List<List> genPws(pattern, List prefixes, List suffixes) {
+    // Insert an empty string in each list
+    for (List lst in [prefixes, suffixes]) {
       if (lst.indexOf('') < 0) {
         lst.insert(0, '');
       }
     }
-    result = [];
-    len1 = prefixes.length;
-    for (n = 0; n < len1; n++) {
-      prefix = prefixes[n];
-      len2 = suffixes.length;
-      for (o = 0; o < len2; o++) {
-        suffix = suffixes[o];
-        ref1 = [prefix.length, prefix.length + pattern.length - 1];
-        i = ref1[0];
-        j = ref1[1];
-        result.add([prefix + pattern + suffix, i, j]);
+    List<List> result = [];
+    for (String prefix in prefixes) {
+      for (String suffix in suffixes) {
+        result.add([prefix + pattern + suffix, prefix.length, prefix.length + pattern.length - 1]);
       }
     }
     return result;
   }
   ;
 
-  check_matches(
-      prefix, List<scoring.Match> matches, pattern_names, List patterns, ijs, List<scoring.Match> expectedMatches) {
-    var i,
-        is_equal_len_args,
-        j,
-        k,
-        l,
-        lst,
-        match,
-        msg,
-        pattern,
-        pattern_name,
-        prop,
-        prop_list,
-        prop_msg,
-        prop_name,
-        ref,
-        ref1,
-        ref2,
-        results;
-    if (pattern_names is String) {
-      List result = [];
+  checkFailed(Function callback, {String reason}) {
+    bool success = false;
+    try {
+      callback();
+      success = true;
+    } catch (e) {}
+    expect(success, isFalse, reason: reason);
+  }
+
+  checkMatches(String prefix, List<scoring.Match> matches, var patternNamesOrName, List<String> patterns,
+      List<List<int>> ijs, List<scoring.Match> expectedMatches) {
+    int i, j, k;
+    DictionaryMatch match;
+    String msg;
+    String pattern;
+
+    List<String> patternNames;
+    // shortcut: if checking for a list of the same type of patterns,
+    // allow passing a string 'pat' instead of array ['pat', 'pat', ...]
+    if (patternNamesOrName is String) {
+      patternNames = [];
       for (i = 0; i < patterns.length; i++) {
-        result.add(pattern_names);
+        patternNames.add(patternNamesOrName);
       }
-      pattern_names = result;
+    } else {
+      patternNames = patternNamesOrName;
     }
 
-    msg = prefix + ": matches.length == ${patterns.length}";
-    expect(matches.length, patterns.length, reason: msg);
-    results = [];
+    // Make sure the argument have the same length
+    msg = 'unequal argument lists to check_matches';
+    expect(patternNames.length, patterns.length, reason: msg);
+    expect(patternNames.length, ijs.length, reason: msg);
+    expect(patternNames.length, expectedMatches.length, reason: msg);
+
+    expect(matches.length, patterns.length, reason: "${prefix}: matches.length == ${patterns.length}");
     for (k = 0; k < patterns.length; k++) {
       match = matches[k];
-      pattern_name = pattern_names[k];
+      String patternName = patternNames[k];
       pattern = patterns[k];
-      ref2 = ijs[k];
-      i = ref2[0];
-      j = ref2[1];
-      msg = prefix + ": matches[${k}].pattern == '" + pattern_name + "'";
-      expect(match.pattern, pattern_name, reason: msg);
-      msg = prefix + ": matches[${k}] should have [i, j] of [${i}, ${j}]";
-      expect([match.i, match.j], [i, j], reason: msg);
-      msg = prefix + ": matches[${k}].token == '" + pattern + "'";
-      expect(match.token, pattern, reason: msg);
+      var ij = ijs[k];
+      i = ij[0];
+      j = ij[1];
+      expect(match.pattern, patternName, reason: "${prefix}: matches[${k}].pattern == '${patternName}'");
+      expect([match.i, match.j], [i, j], reason: "${prefix}: matches[${k}] should have [i, j] of [${i}, ${j}]");
+      expect(match.token, pattern, reason: "${prefix}: matches[${k}].token == '${pattern}'");
 
       // Check matching
       scoring.Match expectedMatch = expectedMatches[k];
@@ -236,31 +219,45 @@ main() {
       } else {
         throw "not supported yet";
       }
-
-      /*
-      props.forEach((prop_name, prop_list) {
-        prop_msg = prop_list[k];
-        if (prop_msg is String) {
-          prop_msg = "'" + prop_msg + "'";
-        }
-        msg = prefix + ": matches[${k}].${prop_name} == ${prop_msg}";
-        expect(match[prop_name], prop_list[k], reason: msg);
-      });
-      */
     }
   }
   ;
 
-  test('dictionary matching', () {
-    var dict, dm, i, ijs, j, l, len, matches, msg, name, password, patterns, prefixes, rank, ref, ref1, suffixes, word;
+  test('genWps', () {
+    // dart only test - not present in original implementation
+    expect(genPws('word', ['pre'], ['post']), [
+      ['word', 0, 3],
+      ['wordpost', 0, 3],
+      ['preword', 3, 6],
+      ['prewordpost', 3, 6]
+    ]);
+    expect(genPws('word', ['pre1', 'pre2'], ['post1', 'post2']), [
+      ['word', 0, 3],
+      ['wordpost1', 0, 3],
+      ['wordpost2', 0, 3],
+      ['pre1word', 4, 7],
+      ['pre1wordpost1', 4, 7],
+      ['pre1wordpost2', 4, 7],
+      ['pre2word', 4, 7],
+      ['pre2wordpost1', 4, 7],
+      ['pre2wordpost2', 4, 7]
+    ]);
+  });
 
-    Map<String, Map<String, int>> test_dicts = {
+  test('dictionary matching', () {
+    //var dm, i, ijs, j, matches, msg, password, patterns, prefixes, suffixes, word;
+    List<String> patterns;
+    List<scoring.Match> matches;
+    String msg;
+
+    Map<String, Map<String, int>> testDicts = {
       "d1": {"motherboard": 1, "mother": 2, "board": 3, "abcd": 4, "cdef": 5},
       "d2": {'z': 1, '8': 2, '99': 3, r'$': 4, 'asdf1234&*': 5}
     };
-    dm = (pw) {
-      return dictionaryMatch(pw, test_dicts);
-    };
+    List<scoring.Match> dm(pw) {
+      return dictionaryMatch(pw, testDicts);
+    }
+    ;
     matches = dm('motherboard');
     patterns = ['mother', 'motherboard', 'board'];
     msg = "matches words that contain other words";
@@ -268,7 +265,7 @@ main() {
     ndm(String matchedWord, int rank, String dictionaryName) =>
         new DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
 
-    check_matches(msg, matches, 'dictionary', patterns, [
+    checkMatches(msg, matches, 'dictionary', patterns, [
       [0, 5],
       [0, 10],
       [6, 10]
@@ -277,11 +274,45 @@ main() {
       ndm('motherboard', 1, 'd1'),
       ndm('board', 3, 'd1')
     ]);
+    // Check changing any of the expected parameters in the result make if failed in any solution
+    checkFailed(() {
+      checkMatches(msg, matches, 'dictionary', patterns, [
+        [0, 5],
+        [0, 10],
+        [6, 10]
+      ], [
+        ndm('XXXXmother', 2, 'd1'),
+        ndm('motherboard', 1, 'd1'),
+        ndm('board', 3, 'd1')
+      ]);
+    });
+    checkFailed(() {
+      checkMatches(msg, matches, 'dictionary', patterns, [
+        [0, 5],
+        [0, 10],
+        [6, 10]
+      ], [
+        ndm('mother', 2, 'd1'),
+        ndm('motherboard', 1000000, 'd1'),
+        ndm('board', 3, 'd1')
+      ]);
+    });
+    checkFailed(() {
+      checkMatches(msg, matches, 'dictionary', patterns, [
+        [0, 5],
+        [0, 10],
+        [6, 10]
+      ], [
+        ndm('mother', 2, 'd1'),
+        ndm('motherboard', 1, 'd1'),
+        ndm('board', 3, 'XXXXd1')
+      ]);
+    });
 
     matches = dm('abcdef');
     patterns = ['abcd', 'cdef'];
     msg = "matches multiple words when they overlap";
-    check_matches(msg, matches, 'dictionary', patterns, [
+    checkMatches(msg, matches, 'dictionary', patterns, [
       [0, 3],
       [2, 5]
     ], [
@@ -292,7 +323,7 @@ main() {
     matches = dm('BoaRdZ');
     patterns = ['BoaRd', 'Z'];
     msg = "ignores uppercasing";
-    check_matches(msg, matches, 'dictionary', patterns, [
+    checkMatches(msg, matches, 'dictionary', patterns, [
       [0, 4],
       [5, 5]
     ], [
@@ -300,35 +331,34 @@ main() {
       ndm('z', 1, 'd2')
     ]);
 
-    prefixes = ['q', '%%'];
-    suffixes = ['%', 'qq'];
-    word = 'asdf1234&*';
+    List<String> prefixes = ['q', '%%'];
+    List<String> suffixes = ['%', 'qq'];
+    String word = 'asdf1234&*';
 
-    ref = genpws(word, prefixes, suffixes);
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      password = ref1[0];
-      i = ref1[1];
-      j = ref1[2];
+    List<List> pws = genPws(word, prefixes, suffixes);
+    pws.forEach((List pwRow) {
+      String password = pwRow[0];
+      int i = pwRow[1];
+      int j = pwRow[2];
       matches = dm(password);
       msg = "identifies words surrounded by non-words";
-      check_matches(msg, matches, 'dictionary', [
+      checkMatches(msg, matches, 'dictionary', [
         word
       ], [
         [i, j]
       ], [
         ndm(word, 5, "d2")
       ]);
-    }
+    });
 
-    test_dicts.forEach((String name, dict) {
-      Map<String, int> dict = test_dicts[name];
+    testDicts.forEach((String name, dict) {
+      Map<String, int> dict = testDicts[name];
       dict.forEach((String word, int rank) {
+        // skip words that contain others
         if (word != 'motherboard') {
           matches = dm(word);
           msg = "matches against all words in provided dictionaries";
-          check_matches(msg, matches, 'dictionary', [
+          checkMatches(msg, matches, 'dictionary', [
             word
           ], [
             [0, word.length - 1]
@@ -339,16 +369,17 @@ main() {
       });
     });
 
+    // test the default dictionaries
     matches = dictionaryMatch('rosebud');
     patterns = ['ros', 'rose', 'rosebud', 'bud'];
-    ijs = [
+    List<List<int>> ijs = [
       [0, 2],
       [0, 3],
       [0, 6],
       [4, 6]
     ];
     msg = "default dictionaries";
-    check_matches(msg, matches, 'dictionary', patterns, ijs, [
+    checkMatches(msg, matches, 'dictionary', patterns, ijs, [
       ndm(patterns[0], 13085, "surnames"),
       ndm(patterns[1], 65, "female_names"),
       ndm(patterns[2], 245, "passwords"),

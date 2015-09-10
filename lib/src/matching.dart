@@ -1,6 +1,5 @@
 library xcvbnm.matching;
 
-import "../xcvbnm.dart" as xcvbnm;
 import "scoring.dart" as scoring;
 import 'frequency_lists.dart';
 
@@ -62,16 +61,16 @@ class DictionaryMatch extends scoring.Match {
   String dictionaryName;
 }
 
-dictionaryMatch(password, [Map _ranked_dictionaries]) {
+dictionaryMatch(password, [Map rankedDictionaries_]) {
   // _ranked_dictionaries variable is for unit testing purposes
-  var dictionary_name, i, j, len, matches, o, p, rank, ranked_dict, ref, ref1, ref2, word;
-  if (_ranked_dictionaries == null) {
-    _ranked_dictionaries = rankedDictionaries;
+  var len, matches, rank, word;
+  if (rankedDictionaries_ == null) {
+    rankedDictionaries_ = rankedDictionaries;
   }
   matches = [];
   len = password.length;
   String password_lower = password.toLowerCase();
-  _ranked_dictionaries.forEach((dictionary_name, Map<String, int> ranked_dict) {
+  rankedDictionaries_.forEach((dictionary_name, Map<String, int> ranked_dict) {
     for (int i = 0; i < len; i++) {
       for (int j = i; j < len; j++) {
         word = password_lower.substring(i, j + 1);
