@@ -214,6 +214,9 @@ main() {
       if (expectedMatch.j != null) {
         expect(expectedMatch.j, match.j, reason: msg);
       }
+      if (expectedMatch.token != null) {
+        expect(expectedMatch.token, match.token, reason: msg);
+      }
 
       if (expectedMatch is DictionaryMatch) {
         DictionaryMatch foundMatch = match as DictionaryMatch;
@@ -235,9 +238,6 @@ main() {
       } else if (expectedMatch is scoring.SpatialMatch) {
         scoring.SpatialMatch foundMatch = match as scoring.SpatialMatch;
 
-        if (expectedMatch.token != null) {
-          expect(expectedMatch.token, foundMatch.token, reason: msg);
-        }
         if (expectedMatch.graph != null) {
           expect(expectedMatch.graph, foundMatch.graph, reason: msg);
         }
@@ -273,6 +273,12 @@ main() {
         }
         if (expectedMatch.separator != null) {
           expect(expectedMatch.separator, foundMatch.separator, reason: msg);
+        }
+      } else if (expectedMatch is scoring.RepeatMatch) {
+        scoring.RepeatMatch foundMatch = match as scoring.RepeatMatch;
+
+        if (expectedMatch.repeatedChar != null) {
+          expect(expectedMatch.repeatedChar, foundMatch.repeatedChar, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -836,6 +842,84 @@ main() {
   // dart specific test
   test('mapIntsToDmy', () {
     expect(mapIntsToDmy([12, 20, 919]), isNull);
+  });
+
+  test('repeat matching', () {
+    List<scoring.RepeatMatch> matches;
+    String msg;
+
+    for (String password in ['', '#', '##']) {
+      expect(repeatMatch(password), [], reason: "doesn't match length-${password.length} repeat patterns");
+    }
+
+    nrm(String repeatedChar) => new scoring.RepeatMatch(repeatedChar: repeatedChar);
+
+    List prefixes = ['@', 'y4@'];
+    List suffixes = ['u', 'u%7'];
+    String pattern = '&&&&&';
+    genPws(pattern, prefixes, suffixes).forEach((List row) {
+      String password = row[0];
+      int i = row[1];
+      int j = row[2];
+
+      matches = repeatMatch(password);
+      msg = "matches embedded repeat patterns";
+      checkMatches(msg, matches, 'repeat', [
+        pattern
+      ], [
+        [i, j]
+      ], [
+        nrm('&')
+      ]);
+    });
+
+    for (int length in [3, 12]) {
+      for (String chr in ['a', 'Z', '4', '&']) {
+        List list = new List(length + 1);
+        for (int i = 0; i < list.length; i++) {
+          list[i] = chr;
+        }
+        pattern = list.join(chr);
+        matches = repeatMatch(pattern);
+        msg = "matches repeats with base character '${chr}'";
+        checkMatches(msg, matches, 'repeat', [
+          pattern
+        ], [
+          [0, pattern.length - 1]
+        ], [
+          nrm(chr)
+        ]);
+      }
+    }
+
+    matches = repeatMatch('BBB1111aaaaa@@@@@@');
+    List<String> patterns = ['BBB', '1111', 'aaaaa', '@@@@@@'];
+    msg = 'matches multiple adjacent repeats';
+    checkMatches(msg, matches, 'repeat', patterns, [
+      [0, 2],
+      [3, 6],
+      [7, 11],
+      [12, 17]
+    ], [
+      nrm('B'),
+      nrm('1'),
+      nrm('a'),
+      nrm('@')
+    ]);
+
+    matches = repeatMatch('2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729');
+    msg = 'matches multiple repeats with non-repeats in-between';
+    checkMatches(msg, matches, 'repeat', patterns, [
+      [4, 6],
+      [12, 15],
+      [21, 25],
+      [30, 35]
+    ], [
+      nrm('B'),
+      nrm('1'),
+      nrm('a'),
+      nrm('@')
+    ]);
   });
 
   test('date matching', () {

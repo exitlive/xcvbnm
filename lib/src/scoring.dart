@@ -3,6 +3,8 @@ library xcvbnm.scoring;
 import 'dart:math' as math;
 import "adjacency_graphs.dart";
 import "../xcvbnm.dart" as xcvbnm;
+import 'dart:core';
+import 'dart:core' as core;
 
 const num _secondsPerGuess = .010 / 100;
 const int minYearSpace = 20;
@@ -185,10 +187,6 @@ class Match extends xcvbnm.Match {
   // repeat/sequence/regex/spatial entropy
   String token;
 
-  // regex
-  String regexName;
-  List<String> regexMatch;
-
   // dictionary
   int rank;
   num baseEntropy;
@@ -230,17 +228,20 @@ class Match extends xcvbnm.Match {
 }
 
 class SequenceMatch extends Match {
-  SequenceMatch({this.ascending, int i, int j, String token, this.sequenceName, this.sequenceSpace}) {
-    pattern = 'sequence';
-    this.i = i;
-    this.j = j;
-    this.token = token;
-  }
+  SequenceMatch({this.ascending, int i, int j, String token, this.sequenceName, this.sequenceSpace})
+      : super(pattern: 'sequence', i: i, j: j, token: token);
 
   // sequence entropy
   String sequenceName;
   int sequenceSpace;
   bool ascending;
+}
+
+class RepeatMatch extends Match {
+  // regex
+  String repeatedChar;
+
+  RepeatMatch({this.repeatedChar, int i, int j, String token}) : super(pattern: 'repeat', i: i, j: j, token: token);
 }
 
 class SpatialMatch extends Match {
@@ -249,12 +250,17 @@ class SpatialMatch extends Match {
   int shiftedCount;
   int turns;
 
-  SpatialMatch({this.graph, this.shiftedCount, this.turns, int i, int j, String token}) {
-    pattern = 'spatial';
-    this.token = token;
-    this.i = i;
-    this.j = j;
-  }
+  SpatialMatch({this.graph, this.shiftedCount, this.turns, int i, int j, String token})
+      : super(pattern: 'spatial', i: i, j: j, token: token);
+}
+
+class RegexMatch extends Match {
+  // regex
+  String regexName;
+  List<String> regexMatch;
+
+  RegexMatch({this.regexName, this.regexMatch, int i, int j, String token})
+      : super(pattern: 'regex', i: i, j: j, token: token);
 }
 
 class DateMatch extends Match {
@@ -345,7 +351,7 @@ num sequenceEntropy(SequenceMatch match) {
   return base_entropy + lg(match.token.length);
 }
 
-num regexEntropy(Match match) {
+num regexEntropy(RegexMatch match) {
   var year_space;
   Map char_class_bases = {
     "alpha_lower": 26,

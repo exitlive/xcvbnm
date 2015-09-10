@@ -55,6 +55,12 @@ Map<String, Map<String, int>> rankedDictionaries = {
   "female_names": buildRankedDict(frequencyLists["female_names"])
 };
 
+Map<String, String> sequences = {
+  'lower': 'abcdefghijklmnopqrstuvwxyz',
+  'upper': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  'digits': '0123456789'
+};
+
 Map<String, List<String>> l33tTable = {
   'a': ['4', '@'],
   'b': ['8'],
@@ -70,10 +76,14 @@ Map<String, List<String>> l33tTable = {
   'z': ['2']
 };
 
-Map<String, String> sequences = {
-  'lower': 'abcdefghijklmnopqrstuvwxyz',
-  'upper': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  'digits': '0123456789'
+Map<String, RegExp> regexen = {
+  'alpha_lower': new RegExp("[A-Z]{2,}"),
+  'alpha_upper': new RegExp("[a-z]{2,}"),
+  'alpha': new RegExp("[a-zA-Z]{2,}"),
+  'alphanumeric': new RegExp("[a-zA-Z0-9]{2,}"),
+  'digits': new RegExp("\d{2,}"),
+  'symbols': new RegExp("[\W_]{2,}"), // includes non-latin unicode chars
+  'recent_year': new RegExp("19\d\d|200\d|201\d")
 };
 
 int dateMaxYear = 2050;
@@ -421,6 +431,37 @@ List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<
   return matches;
 }
 
+/**
+ * repeats (aaa) and sequences (abcdef)
+ */
+List<scoring.RepeatMatch> repeatMatch(String password) {
+  int minRepeatLength = 3; // TODO allow 2-char repeats?
+  List<scoring.RepeatMatch> matches = [];
+  int i = 0;
+  while (i < password.length) {
+    int j = i + 1;
+    while (true) {
+      String prevChar = password[j - 1];
+      String curChar;
+      if (j < password.length) {
+        curChar = password[j];
+      }
+      if (prevChar == curChar) {
+        j += 1;
+      } else {
+        j -= 1;
+        if (j - i + 1 >= minRepeatLength) {
+          matches
+              .add(new scoring.RepeatMatch(i: i, j: j, token: password.substring(i, j + 1), repeatedChar: password[i]));
+        }
+        break;
+      }
+    }
+    i = j + 1;
+  }
+  return sorted(matches);
+}
+
 List<scoring.Match> sequenceMatch(String password) {
   List<scoring.Match> matches = [];
   int minSequenceLength = 3; // TODO allow 2-char sequences?
@@ -458,6 +499,35 @@ List<scoring.Match> sequenceMatch(String password) {
         }
         i = j + 1;
       }
+    }
+  });
+  return sorted(matches);
+}
+
+/**
+ * regex matching
+ */
+List<scoring.RegexMatch> regexMatch(password, Map<String, RegExp> _regexen) {
+  if (_regexen == null) {
+    _regexen = regexen;
+  }
+
+  List<scoring.RegexMatch> matches = [];
+  _regexen.forEach((String name, RegExp regex) {
+    // regex.lastIndex = 0 # keeps regex_match stateless
+    while (true) {
+      List<core.Match> rxMatch = regex.allMatches(password);
+      if (rxMatch.isEmpty) {
+        break;
+      }
+      core.Match coreMatch = rxMatch[0];
+      String token = coreMatch.group(0);
+
+      // TODO
+      // List<String> regexMatches = [];
+
+      matches.add(new scoring.RegexMatch(
+          token: token, i: coreMatch.start, j: coreMatch.end - 1, regexName: name, regexMatch: null));
     }
   });
   return sorted(matches);
@@ -651,7 +721,7 @@ _DayMonthYear mapIntsToDmy(List<int> ints) {
     List rest = row[1];
 
     if (dateMinYear <= y && y <= dateMaxYear) {
-// GOON HERE
+      // GOON HERE
       _DayMonth dm = mapIntsToDm(rest);
       if (dm != null) {
         return new _DayMonthYear(day: dm.day, month: dm.month, year: y);
@@ -684,6 +754,7 @@ class _DayMonth {
   int month;
 
   _DayMonth({this.day, this.month});
+
   toString() => "$month/$day";
 }
 
