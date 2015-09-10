@@ -13,3 +13,4 @@ pubspec.lock
 */!.gitignore
 */!.rsyncignore
 */!.dockerignore
+build/

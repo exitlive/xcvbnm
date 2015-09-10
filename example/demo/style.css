@@ -1,0 +1,20 @@
+body {
+    font-size: smaller;
+}
+
+pre {
+    margin: 0;
+}
+
+.app-result {
+    clear: both;
+    padding: 12px;
+}
+
+.app-match {
+    float: left;
+    color: #666;
+}
+
+.app-line {
+}
