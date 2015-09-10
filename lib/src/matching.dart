@@ -115,6 +115,29 @@ Map<int, List<List<int>>> dateSplits = {
   ]
 };
 
+/**
+ * omnimatch -- combine everything
+ */
+
+List<scoring.Match> omnimatch(String password) {
+  List<scoring.Match> matches = [];
+  List<Function> matchers = [
+    dictionaryMatch,
+    l33tMatch,
+    spatialMatch,
+    repeatMatch,
+    sequenceMatch,
+    regexMatch,
+    dateMatch
+  ];
+
+  for (var matcher in matchers) {
+    matches.addAll(matcher(password));
+  }
+
+  return sorted(matches);
+}
+
 class DictionaryMatch extends scoring.Match {
   DictionaryMatch({this.matchedWord, this.dictionaryName, int rank, Map<String, String> sub, bool l33t}) {
     this.rank = rank;
@@ -183,11 +206,26 @@ Map<String, List<String>> relevantL33tSubtable(String password, Map<String, List
  * in javascript, it compares the first element, if null put it at the end, if empty at the beginnin
  * it handles list recursively
  *
+ * [[2, 3], [1, 2], null, [], 1, 3] => [[], 1, [1, 2], [2, 3], 3, null]
  * @return the list itself
  */
 List<List> sortListOfList(List<List> lists) {
+  int compareValue(var v1, var v2) {
+    try {
+      if (v1 == null) {
+        if (v2 == null) {
+          return 0;
+        }
+        return 1;
+      } else if (v2 == null) {
+        return -1;
+      }
+      return v1.compareTo(v2);
+    } catch (e) {}
+    return 0;
+  }
   //
-  int compare(List l1, List l2) {
+  int compare(var l1, var l2) {
     // null at the end
     if (l1 == null) {
       if (l2 == null) {
@@ -196,6 +234,14 @@ List<List> sortListOfList(List<List> lists) {
       return 1;
     } else if (l2 == null) {
       return -1;
+    }
+
+    // convert to list
+    if (!(l1 is List)) {
+      l1 = [l1];
+    }
+    if (!(l2 is List)) {
+      l2 = [l2];
     }
 
     // empty at the beginning
@@ -211,7 +257,24 @@ List<List> sortListOfList(List<List> lists) {
     if (l1[0] is List) {
       return compare(l1[0], l2[0]);
     }
-    return l1[0].compareTo(l2[0]);
+
+    int result = 0;
+    for (int i = 0; i < l1.length; i++) {
+      // l1 bigger so exit
+      if (i >= l2.length) {
+        return 1;
+      } else {
+        result = compareValue(l1[i], l2[i]);
+        if (result != 0) {
+          break;
+        }
+      }
+    }
+    if (result == 0 && l2.length > l1.length) {
+      return -1;
+    }
+
+    return result;
   }
   lists.sort(compare);
   return lists;
@@ -507,7 +570,7 @@ List<scoring.Match> sequenceMatch(String password) {
 /**
  * regex matching
  */
-List<scoring.RegexMatch> regexMatch(password, Map<String, RegExp> _regexen) {
+List<scoring.RegexMatch> regexMatch(password, [Map<String, RegExp> _regexen]) {
   if (_regexen == null) {
     _regexen = regexen;
   }
@@ -516,18 +579,20 @@ List<scoring.RegexMatch> regexMatch(password, Map<String, RegExp> _regexen) {
   _regexen.forEach((String name, RegExp regex) {
     // regex.lastIndex = 0 # keeps regex_match stateless
     while (true) {
-      List<core.Match> rxMatch = regex.allMatches(password);
-      if (rxMatch.isEmpty) {
+      core.Match rxMatch = regex.firstMatch(password);
+      if (rxMatch == null) {
         break;
       }
-      core.Match coreMatch = rxMatch[0];
-      String token = coreMatch.group(0);
+      String token = rxMatch[0];
 
-      // TODO
-      // List<String> regexMatches = [];
+      // Convert match to list of string
+      List<String> regexMatches = [];
+      for (int i = 0; i <= rxMatch.groupCount; i++) {
+        regexMatches.add(rxMatch[i]);
+      }
 
       matches.add(new scoring.RegexMatch(
-          token: token, i: coreMatch.start, j: coreMatch.end - 1, regexName: name, regexMatch: null));
+          token: token, i: rxMatch.start, j: rxMatch.end - 1, regexName: name, regexMatch: regexMatches));
     }
   });
   return sorted(matches);
@@ -632,20 +697,18 @@ List<scoring.Match> dateMatch(String password) {
         continue;
       }
       */
-      List<core.Match> rxMatch = new List.from(maybeDateWithSeparator.allMatches(token));
-      if (rxMatch.isEmpty) {
+      core.Match rxMatch = maybeDateWithSeparator.firstMatch(token);
+      if (rxMatch == null) {
         continue;
       }
-      core.Match coreMatch = rxMatch[0];
-      _DayMonthYear dmy =
-          mapIntsToDmy([int.parse(coreMatch.group(1)), int.parse(coreMatch.group(3)), int.parse(coreMatch.group(4))]);
+      _DayMonthYear dmy = mapIntsToDmy([int.parse(rxMatch[1]), int.parse(rxMatch[3]), int.parse(rxMatch[4])]);
 
       if (dmy == null) {
         continue;
       }
 
       matches.add(new scoring.DateMatch(
-          token: token, i: i, j: j, separator: coreMatch.group(2), year: dmy.year, month: dmy.month, day: dmy.day));
+          token: token, i: i, j: j, separator: rxMatch[2], year: dmy.year, month: dmy.month, day: dmy.day));
     }
   }
 
