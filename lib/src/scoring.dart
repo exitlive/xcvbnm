@@ -186,7 +186,7 @@ class Match extends xcvbnm.Match {
   int day;
 
   // ?? never used
-  bool hasFullYear = false;
+  bool hasFullYear;
   String separator;
 
   // repeat/sequence/regex/spatial entropy
@@ -208,9 +208,15 @@ class Match extends xcvbnm.Match {
   int rank;
   num baseEntropy;
   num uppercaseEntropy;
-  bool l33t = false;
+  bool l33t;
   num l33tEntropy;
-  Map sub;
+  Map<String, String> sub;
+  String get subDisplay {
+    if (sub == null) {
+      return null;
+    }
+    return sub.toString();
+  }
 
   // match sequence
   int i;
@@ -239,7 +245,7 @@ num dateEntropy(Match match) {
   var entropy, year_space;
   year_space = math.max((match.year - referenceYear).abs(), minYearSpace);
   entropy = lg(year_space * 31 * 12);
-  if (match.hasFullYear) {
+  if (match.hasFullYear == true) {
     entropy += 1;
   }
   if (match.separator != null && match.separator.length > 0) {
@@ -454,7 +460,7 @@ num extraUppercaseEntropy(Match match) {
 
 num extraL33tEntropy(Match match) {
   var S, U, chr, chrs, extra_entropy, i, l, p, possibilities, ref1, subbed, unsubbed;
-  if (!match.l33t) {
+  if (match.l33t != true) {
     return 0;
   }
   extra_entropy = 0;

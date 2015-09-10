@@ -192,7 +192,7 @@ main() {
     expect(patternNames.length, ijs.length, reason: msg);
     expect(patternNames.length, expectedMatches.length, reason: msg);
 
-    expect(matches.length, patterns.length, reason: "${prefix}: matches.length == ${patterns.length}");
+    expect(expectedMatches.length, patterns.length, reason: "${prefix}: matches.length == ${patterns.length}");
     for (k = 0; k < patterns.length; k++) {
       match = matches[k];
       String patternName = patternNames[k];
@@ -215,6 +215,12 @@ main() {
         }
         if (expectedMatch.dictionaryName != null) {
           expect(expectedMatch.dictionaryName, match.dictionaryName, reason: msg);
+        }
+        if (expectedMatch.l33t != null) {
+          expect(expectedMatch.l33t, match.l33t, reason: msg);
+        }
+        if (expectedMatch.sub != null) {
+          expect(expectedMatch.sub, match.sub, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -254,6 +260,7 @@ main() {
       "d1": {"motherboard": 1, "mother": 2, "board": 3, "abcd": 4, "cdef": 5},
       "d2": {'z': 1, '8': 2, '99': 3, r'$': 4, 'asdf1234&*': 5}
     };
+
     List<scoring.Match> dm(pw) {
       return dictionaryMatch(pw, testDicts);
     }
@@ -274,6 +281,7 @@ main() {
       ndm('motherboard', 1, 'd1'),
       ndm('board', 3, 'd1')
     ]);
+
     // Check changing any of the expected parameters in the result make if failed in any solution
     checkFailed(() {
       checkMatches(msg, matches, 'dictionary', patterns, [
@@ -385,5 +393,199 @@ main() {
       ndm(patterns[2], 245, "passwords"),
       ndm(patterns[3], 786, "male_names")
     ]);
+  });
+
+  test('sortListOfList', () {
+    // dart only test - not present in original implementation
+    expect(
+        sortListOfList([
+          [1, 3],
+          [4, 5],
+          null,
+          [],
+          [2]
+        ]),
+        [
+      [],
+      [1, 3],
+      [2],
+      [4, 5],
+      null
+    ]);
+  });
+
+  test('l33t matching', () {
+    Map<String, List<String>> testTable = {
+      'a': ['4', '@'],
+      'c': ['(', '{', '[', '<'],
+      'g': ['6', '9'],
+      'o': ['0']
+    };
+
+    List<List> testData = [
+      ['', {}],
+      [r'abcdefgo123578!#$&*)]}>', {}],
+      ['a', {}],
+      [
+        '4',
+        {
+          'a': ['4']
+        }
+      ],
+      [
+        '4@',
+        {
+          'a': ['4', '@']
+        }
+      ],
+      [
+        '4({60',
+        {
+          'a': ['4'],
+          'c': ['(', '{'],
+          'g': ['6'],
+          'o': ['0']
+        }
+      ]
+    ];
+
+    testData.forEach((List row) {
+      String pw = row[0];
+      Map expected = row[1];
+
+      expect(relevantL33tSubtable(pw, testTable), expected,
+          reason: "reduces l33t table to only the substitutions that a password might be employing");
+    });
+
+    [
+      [
+        {},
+        [{}]
+      ],
+      [
+        {
+          'a': ['@']
+        },
+        [
+          {'@': 'a'}
+        ]
+      ],
+      [
+        {
+          'a': ['@', '4']
+        },
+        [
+          {'@': 'a'},
+          {'4': 'a'}
+        ]
+      ],
+      [
+        {
+          'a': ['@', '4'],
+          'c': ['(']
+        },
+        [
+          {'@': 'a', '(': 'c'},
+          {'4': 'a', '(': 'c'}
+        ]
+      ]
+    ].forEach((List row) {
+      Map<String, List<String>> table = row[0];
+      List<Map<String, String>> subs = row[1];
+      expect(enumerateL33tSubs(table), subs,
+          reason: "enumerates the different sets of l33t substitutions a password might be using");
+    });
+
+    Map<String, Map<String, int>> dicts = {
+      'words': {'aac': 1, 'password': 3, 'paassword': 4, 'asdf0': 5},
+      'words2': {'cgo': 1}
+    };
+
+    lm(pw) {
+      return l33tMatch(pw, dicts, testTable);
+    }
+    ;
+
+    expect(lm(''), [], reason: "doesn't match ''");
+    expect(lm('password'), [], reason: "doesn't match pure dictionary words");
+
+    [
+      [
+        'p4ssword',
+        'p4ssword',
+        'password',
+        'words',
+        3,
+        [0, 7],
+        {'4': 'a'}
+      ],
+      [
+        'p@ssw0rd',
+        'p@ssw0rd',
+        'password',
+        'words',
+        3,
+        [0, 7],
+        {'@': 'a', '0': 'o'}
+      ],
+      [
+        'aSdfO{G0asDfO',
+        '{G0',
+        'cgo',
+        'words2',
+        1,
+        [5, 7],
+        {'{': 'c', '0': 'o'}
+      ]
+    ].forEach((List row) {
+      String password = row[0];
+      String pattern = row[1];
+      String word = row[2];
+      String dictionaryName = row[3];
+      int rank = row[4];
+      List ij = row[5];
+      Map<String, String> sub = row[6];
+
+      checkMatches("matches against common l33t substitutions", lm(password), 'dictionary', [
+        pattern
+      ], [
+        ij
+      ], [
+        new DictionaryMatch()
+          ..l33t = true
+          ..sub = sub
+          ..matchedWord = word
+          ..rank = rank
+          ..dictionaryName = dictionaryName
+      ]);
+    });
+
+    ndm(bool l33t, Map sub, String matchedWord, int rank, String dictionaryName) =>
+        new DictionaryMatch(l33t: l33t, sub: sub, matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
+    checkMatches("matches against overlapping l33t patterns", lm('@a(go{G0'), 'dictionary', [
+      '@a(',
+      '(go',
+      '{G0'
+    ], [
+      [0, 2],
+      [2, 4],
+      [5, 7]
+    ], [
+      ndm(true, {'@': 'a', '(': 'c'}, 'aac', 1, 'words'),
+      ndm(true, {'(': 'c'}, 'cgo', 1, 'words2'),
+      ndm(true, {'{': 'c', '0': 'o'}, 'cgo', 1, 'words2')
+    ]);
+
+    expect(lm('p4@ssword'), [],
+        reason: "doesn't match when multiple l33t substitutions are needed for the same letter");
+
+    // known issue: subsets of substitutions aren't tried.
+    // for long inputs, trying every subset of every possible substitution could quickly get large,
+    // but there might be a performant way to fix.
+    //# (so in this example: {'4': a, '0': 'o'} is detected as a possible sub,
+    // but the subset {'4': 'a'} isn't tried, missing the match for asdf0.)
+    // TODO: consider partially fixing by trying all subsets of size 1 and maybe 2
+
+    expect(lm('4sdf0'), [], reason: "doesn't match with subsets of possible l33t substitutions");
   });
 }
