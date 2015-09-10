@@ -11,7 +11,16 @@ main() {
 
   test('nCk', () {
     var k, l, len, n, ref, ref1, result;
-    ref = [[0, 0, 1], [1, 0, 1], [5, 0, 1], [0, 1, 0], [0, 5, 0], [2, 1, 2], [4, 2, 6], [33, 7, 4272048]];
+    ref = [
+      [0, 0, 1],
+      [1, 0, 1],
+      [5, 0, 1],
+      [0, 1, 0],
+      [0, 5, 0],
+      [2, 1, 2],
+      [4, 2, 6],
+      [33, 7, 4272048]
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
@@ -28,7 +37,12 @@ main() {
 
   test('lg', () {
     var l, len, n, p, ref, ref1, result;
-    ref = [[1, 0], [2, 1], [4, 2], [32, 5]];
+    ref = [
+      [1, 0],
+      [2, 1],
+      [4, 2],
+      [32, 5]
+    ];
 
     len = ref.length;
     for (l = 0; l < len; l++) {
@@ -70,7 +84,11 @@ main() {
 
   test('crackTimeToScore', () {
     var l, len, msg, ref, ref1, score, seconds;
-    ref = [[0, 0], [10, 0], [math.pow(10, 9), 4]];
+    ref = [
+      [0, 0],
+      [10, 0],
+      [math.pow(10, 9), 4]
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
@@ -83,7 +101,26 @@ main() {
 
   test('calcBruteforceCardinality', () {
     var cardinality, l, len, msg, ref, ref1, str;
-    ref = [['a', 26], ['h', 26], ['z', 26], ['Q', 26], ['0', 10], ['9', 10], ['\$', 33], ['£', 64], ['å', 64], ['α', 40], ['αβ', 40], ['Ϫα', 58], ['好', 40], ['信息论', 100], ['a\$', 59], ['aQ£', 116], ['9Z9Z', 36], ['«信息论»', 164]];
+    ref = [
+      ['a', 26],
+      ['h', 26],
+      ['z', 26],
+      ['Q', 26],
+      ['0', 10],
+      ['9', 10],
+      ['\$', 33],
+      ['£', 64],
+      ['å', 64],
+      ['α', 40],
+      ['αβ', 40],
+      ['Ϫα', 58],
+      ['好', 40],
+      ['信息论', 100],
+      ['a\$', 59],
+      ['aQ£', 116],
+      ['9Z9Z', 36],
+      ['«信息论»', 164]
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
@@ -96,7 +133,18 @@ main() {
 
   test('displayTime', () {
     var display, l, len, msg, ref, ref1, seconds;
-    ref = [[0, '0 seconds'], [1, '1 second'], [32, '32 seconds'], [60, '1 minute'], [121, '2 minutes'], [3600, '1 hour'], [2 * 3600 * 24 + 5, '2 days'], [1 * 3600 * 24 * 31 + 4000, '1 month'], [99 * 3600 * 24 * 31 * 12, '99 years'], [math.pow(10, 10), 'centuries']];
+    ref = [
+      [0, '0 seconds'],
+      [1, '1 second'],
+      [32, '32 seconds'],
+      [60, '1 minute'],
+      [121, '2 minutes'],
+      [3600, '1 hour'],
+      [2 * 3600 * 24 + 5, '2 days'],
+      [1 * 3600 * 24 * 31 + 4000, '1 month'],
+      [99 * 3600 * 24 * 31 * 12, '99 years'],
+      [math.pow(10, 10), 'centuries']
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
@@ -212,34 +260,34 @@ main() {
     result = minimumEntropyMatchSequence(password, matches);
     expect(result.entropy, 2, reason: msg("total entropy == 2"));
     expect(result.matchSequence, [m1, m2], reason: msg("match_sequence is [m1, m2]"));
-
   });
-
 
   test('calcEntropy', () {
     var match, msg;
-    match = new Match()
-      ..entropy = 1;
+    match = new Match()..entropy = 1;
     expect(calcEntropy(match), 1, reason: "calc_entropy returns cached entropy when available");
     match = new Match()
       ..pattern = 'date'
       ..year = 1977
       ..month = 7
-      .. day = 14;
+      ..day = 14;
     msg = "calc_entropy delegates based on pattern";
     expect(calcEntropy(match), dateEntropy(match), reason: msg);
   });
 
   test('repeatEntropy', () {
     var entropy, l, len, match, msg, ref, ref1, token;
-    ref = [['aa', lg(26 * 2)], ['999', lg(10 * 3)], ['\$\$\$\$', lg(33 * 4)]];
+    ref = [
+      ['aa', lg(26 * 2)],
+      ['999', lg(10 * 3)],
+      ['\$\$\$\$', lg(33 * 4)]
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
       token = ref1[0];
       entropy = ref1[1];
-      match = new Match()
-        ..token = token;
+      match = new Match()..token = token;
       msg = "the repeat pattern '${token}' has entropy of ${entropy}";
       expect(repeatEntropy(match), entropy, reason: msg);
     }
@@ -252,7 +300,8 @@ main() {
       ['XYZ', true, lg(26) + 1 + lg(3)],
       ['4567', true, lg(10) + lg(4)],
       ['7654', false, lg(10) + lg(4) + 1],
-      ['ZYX', false, lg(26) + 1 + lg(3) + 1]];
+      ['ZYX', false, lg(26) + 1 + lg(3) + 1]
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
@@ -261,7 +310,7 @@ main() {
       entropy = ref1[2];
       match = new Match()
         ..token = token
-        .. ascending = ascending;
+        ..ascending = ascending;
       msg = "the sequence pattern '${token}' has entropy of ${entropy}";
       expect(sequenceEntropy(match), entropy, reason: msg);
     }
@@ -386,18 +435,14 @@ main() {
       ..token = 'aaa@@@'
       ..rank = 32
       ..l33t = true
-      ..sub = {
-      '@': 'a'
-    };
+      ..sub = {'@': 'a'};
     msg = "extra entropy is added for common l33t substitutions";
     expect(dictionaryEntropy(match), lg(32) + extraL33tEntropy(match), reason: msg);
     match = new Match()
       ..token = 'AaA@@@'
       ..rank = 32
       ..l33t = true
-      ..sub = {
-      '@': 'a'
-    };
+      ..sub = {'@': 'a'};
     msg = "extra entropy is added for both capitalization and common l33t substitutions";
     expected = lg(32) + extraL33tEntropy(match) + extraUppercaseEntropy(match);
     expect(dictionaryEntropy(match), expected, reason: msg);
@@ -405,65 +450,83 @@ main() {
 
   test('extraUppercaseEntropy', () {
     var extra_entropy, l, len, msg, ref, ref1, word;
-    ref = [['', 0], ['a', 0], ['A', 1], ['abcdef', 0], ['Abcdef', 1], ['abcdeF', 1], ['ABCDEF', 1], ['aBcdef', lg(nCk(6, 1))], ['aBcDef', lg(nCk(6, 1) + nCk(6, 2))], ['ABCDEf', lg(nCk(6, 1))], ['aBCDEf', lg(nCk(6, 1) + nCk(6, 2))], ['ABCdef', lg(nCk(6, 1) + nCk(6, 2) + nCk(6, 3))]];
+    ref = [
+      ['', 0],
+      ['a', 0],
+      ['A', 1],
+      ['abcdef', 0],
+      ['Abcdef', 1],
+      ['abcdeF', 1],
+      ['ABCDEF', 1],
+      ['aBcdef', lg(nCk(6, 1))],
+      ['aBcDef', lg(nCk(6, 1) + nCk(6, 2))],
+      ['ABCDEf', lg(nCk(6, 1))],
+      ['aBCDEf', lg(nCk(6, 1) + nCk(6, 2))],
+      ['ABCdef', lg(nCk(6, 1) + nCk(6, 2) + nCk(6, 3))]
+    ];
     len = ref.length;
     for (l = 0; l < len; l++) {
       ref1 = ref[l];
       word = ref1[0];
       extra_entropy = ref1[1];
       msg = "extra uppercase entropy of ${word} is ${extra_entropy}";
-      expect(extraUppercaseEntropy(new Match()
-        ..
-      token = word
-      ), extra_entropy, reason: msg);
+      expect(extraUppercaseEntropy(new Match()..token = word), extra_entropy, reason: msg);
     }
   });
 
   test('extraL33tEntropy', () {
     var extra_entropy, l, len, match, msg, ref, ref1, word;
     Map sub;
-    match = new Match()
-      ..l33t = false;
+    match = new Match()..l33t = false;
     expect(extraL33tEntropy(match), 0, reason: "0 extra entropy for non-l33t matches");
     ref = [
-      ['', 0, {}], ['a', 0, {}], [
-        '4', 1, {
-          '4': 'a'
-        }
-      ], [
-        '4pple', 1, {
-          '4': 'a'
-        }
-      ], ['abcet', 0, {}], [
-        '4bcet', 1, {
-          '4': 'a'
-        }
-      ], [
-        'a8cet', 1, {
-          '8': 'b'
-        }
-      ], [
-        'abce+', 1, {
-          '+': 't'
-        }
-      ], [
-        '48cet', 2, {
-          '4': 'a',
-          '8': 'b'
-        }
-      ], [
-        'a4a4aa', lg(nCk(6, 2) + nCk(6, 1)), {
-          '4': 'a'
-        }
-      ], [
-        '4a4a44', lg(nCk(6, 2) + nCk(6, 1)), {
-          '4': 'a'
-        }
-      ], [
-        'a44att+', lg(nCk(4, 2) + nCk(4, 1)) + lg(nCk(3, 1)), {
-          '4': 'a',
-          '+': 't'
-        }
+      ['', 0, {}],
+      ['a', 0, {}],
+      [
+        '4',
+        1,
+        {'4': 'a'}
+      ],
+      [
+        '4pple',
+        1,
+        {'4': 'a'}
+      ],
+      ['abcet', 0, {}],
+      [
+        '4bcet',
+        1,
+        {'4': 'a'}
+      ],
+      [
+        'a8cet',
+        1,
+        {'8': 'b'}
+      ],
+      [
+        'abce+',
+        1,
+        {'+': 't'}
+      ],
+      [
+        '48cet',
+        2,
+        {'4': 'a', '8': 'b'}
+      ],
+      [
+        'a4a4aa',
+        lg(nCk(6, 2) + nCk(6, 1)),
+        {'4': 'a'}
+      ],
+      [
+        '4a4a44',
+        lg(nCk(6, 2) + nCk(6, 1)),
+        {'4': 'a'}
+      ],
+      [
+        'a44att+',
+        lg(nCk(4, 2) + nCk(4, 1)) + lg(nCk(3, 1)),
+        {'4': 'a', '+': 't'}
       ]
     ];
     len = ref.length;
@@ -482,9 +545,7 @@ main() {
     match = new Match()
       ..token = 'Aa44aA'
       ..l33t = true
-      ..sub = {
-      '4': 'a'
-    };
+      ..sub = {'4': 'a'};
     extra_entropy = lg(nCk(6, 2) + nCk(6, 1));
     msg = "capitalization doesn't affect extra l33t entropy calc";
     expect(extraL33tEntropy(match), extra_entropy, reason: msg);

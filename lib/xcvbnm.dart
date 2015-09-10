@@ -1,8 +1,6 @@
 library xcvbnm;
 
-abstract class Match {
-
-}
+abstract class Match {}
 
 class Result {
   // password
@@ -42,7 +40,6 @@ class Xcvbnm {
   }
 
   Result estimate(String password, {List<String> userInputs}) {
-    return new Result()
-      ..score = getNaiveScore(password);
+    return new Result()..score = getNaiveScore(password);
   }
 }

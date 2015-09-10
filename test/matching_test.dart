@@ -7,38 +7,37 @@ import "package:xcvbnm/src/scoring.dart" as scoring;
 main() {
   test('matching utils', () {
     var chr_map,
-    dividend,
-    divisor,
-    l,
-    len2,
-    lst,
-    lst1,
-    lst2,
-    m1,
-    m2,
-    m3,
-    m4,
-    m5,
-    m6,
-    map,
-    msg,
-    n,
-    o,
-    obj,
-    ref,
-    ref1,
-    ref2,
-    ref3,
-    ref4,
-    ref5,
-    ref6,
-    ref7,
-    remainder,
-    result,
-    string;
+        dividend,
+        divisor,
+        l,
+        len2,
+        lst,
+        lst1,
+        lst2,
+        m1,
+        m2,
+        m3,
+        m4,
+        m5,
+        m6,
+        map,
+        msg,
+        n,
+        o,
+        obj,
+        ref,
+        ref1,
+        ref2,
+        ref3,
+        ref4,
+        ref5,
+        ref6,
+        ref7,
+        remainder,
+        result,
+        string;
     expect(empty([]), isTrue, reason: ".empty returns true for an empty array");
-    expect(empty({}), isTrue,
-    reason: ".empty returns true for an empty object");
+    expect(empty({}), isTrue, reason: ".empty returns true for an empty object");
 
     for (var value in [
       [1],
@@ -47,22 +46,16 @@ main() {
       {"a": 1},
       {"0": {}}
     ]) {
-      expect(empty(value), isFalse,
-      reason: ".empty returns false for non-empty objects and arrays");
+      expect(empty(value), isFalse, reason: ".empty returns false for non-empty objects and arrays");
     }
 
     lst = [];
     extend(lst, []);
-    expect(lst, [],
-    reason: "extending an empty list with an empty list leaves it empty");
+    expect(lst, [], reason: "extending an empty list with an empty list leaves it empty");
     extend(lst, [1]);
-    expect(lst, [1],
-    reason:
-    "extending an empty list with another makes it equal to the other");
+    expect(lst, [1], reason: "extending an empty list with another makes it equal to the other");
     extend(lst, [2, 3]);
-    expect(lst, [1, 2, 3],
-    reason:
-    "extending a list with another adds each of the other's elements");
+    expect(lst, [1, 2, 3], reason: "extending a list with another adds each of the other's elements");
     ref1 = [
       [1],
       [2]
@@ -70,8 +63,7 @@ main() {
     lst1 = ref1[0];
     lst2 = ref1[1];
     extend(lst1, lst2);
-    expect(lst2, [2],
-    reason: "extending a list by another doesn't affect the other");
+    expect(lst2, [2], reason: "extending a list by another doesn't affect the other");
     chr_map = {'a': 'A', 'b': 'B'};
     ref2 = [
       ['a', chr_map, 'A'],
@@ -152,8 +144,7 @@ main() {
     m5 = data[4];
     m6 = data[5];
     msg = "matches are sorted on i index primary, j secondary";
-    expect(sorted([m1, m2, m3, m4, m5, m6]), [m4, m6, m5, m3, m1, m2],
-    reason: msg);
+    expect(sorted([m1, m2, m3, m4, m5, m6]), [m4, m6, m5, m3, m1, m2], reason: msg);
   });
 
   genpws(pattern, prefixes, suffixes) {
@@ -185,26 +176,26 @@ main() {
   }
   ;
 
-  check_matches(prefix, List<scoring.Match> matches, pattern_names,
-                List patterns, ijs, List<scoring.Match> expectedMatches) {
+  check_matches(
+      prefix, List<scoring.Match> matches, pattern_names, List patterns, ijs, List<scoring.Match> expectedMatches) {
     var i,
-    is_equal_len_args,
-    j,
-    k,
-    l,
-    lst,
-    match,
-    msg,
-    pattern,
-    pattern_name,
-    prop,
-    prop_list,
-    prop_msg,
-    prop_name,
-    ref,
-    ref1,
-    ref2,
-    results;
+        is_equal_len_args,
+        j,
+        k,
+        l,
+        lst,
+        match,
+        msg,
+        pattern,
+        pattern_name,
+        prop,
+        prop_list,
+        prop_msg,
+        prop_name,
+        ref,
+        ref1,
+        ref2,
+        results;
     if (pattern_names is String) {
       List result = [];
       for (i = 0; i < patterns.length; i++) {
@@ -240,8 +231,7 @@ main() {
           expect(expectedMatch.rank, match.rank, reason: msg);
         }
         if (expectedMatch.dictionaryName != null) {
-          expect(expectedMatch.dictionaryName, match.dictionaryName,
-          reason: msg);
+          expect(expectedMatch.dictionaryName, match.dictionaryName, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -262,24 +252,7 @@ main() {
   ;
 
   test('dictionary matching', () {
-    var dict,
-    dm,
-    i,
-    ijs,
-    j,
-    l,
-    len,
-    matches,
-    msg,
-    name,
-    password,
-    patterns,
-    prefixes,
-    rank,
-    ref,
-    ref1,
-    suffixes,
-    word;
+    var dict, dm, i, ijs, j, l, len, matches, msg, name, password, patterns, prefixes, rank, ref, ref1, suffixes, word;
 
     Map<String, Map<String, int>> test_dicts = {
       "d1": {"motherboard": 1, "mother": 2, "board": 3, "abcd": 4, "cdef": 5},
@@ -293,10 +266,7 @@ main() {
     msg = "matches words that contain other words";
 
     ndm(String matchedWord, int rank, String dictionaryName) =>
-    new DictionaryMatch(
-        matchedWord: matchedWord,
-        rank: rank,
-        dictionaryName: dictionaryName);
+        new DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
 
     check_matches(msg, matches, 'dictionary', patterns, [
       [0, 5],
@@ -378,10 +348,11 @@ main() {
       [4, 6]
     ];
     msg = "default dictionaries";
-    check_matches(msg, matches, 'dictionary', patterns, ijs, [ndm(patterns[0], 13085, "surnames"),
-    ndm(patterns[1], 65, "female_names"),
-    ndm(patterns[2], 245, "passwords"),
-    ndm(patterns[3], 786, "male_names")]
-    );
+    check_matches(msg, matches, 'dictionary', patterns, ijs, [
+      ndm(patterns[0], 13085, "surnames"),
+      ndm(patterns[1], 65, "female_names"),
+      ndm(patterns[2], 245, "passwords"),
+      ndm(patterns[3], 786, "male_names")
+    ]);
   });
 }

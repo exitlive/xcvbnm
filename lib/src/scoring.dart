@@ -54,7 +54,24 @@ int crackTimeToScore(seconds) {
 }
 
 int calcBruteforceCardinality(String password) {
-  var c, cp, digits, l, latin1_letters, latin1_symbols, len, len1, lower, m, max_cp, min_cp, ord, range, ref1, ref2, symbols, upper;
+  var c,
+      cp,
+      digits,
+      l,
+      latin1_letters,
+      latin1_symbols,
+      len,
+      len1,
+      lower,
+      m,
+      max_cp,
+      min_cp,
+      ord,
+      range,
+      ref1,
+      ref2,
+      symbols,
+      upper;
 
   List unicode_codepoints = [];
   ref1 = password.split('');
@@ -486,7 +503,22 @@ num extraL33tEntropy(Match match) {
 }
 
 xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) {
-  var bruteforce_cardinality, candidate_entropy, crack_time, i, j, k, len, len1, m, make_bruteforce_match, match, match_sequence_copy, min_entropy, o, ref2, up_to_k;
+  var bruteforce_cardinality,
+      candidate_entropy,
+      crack_time,
+      i,
+      j,
+      k,
+      len,
+      len1,
+      m,
+      make_bruteforce_match,
+      match,
+      match_sequence_copy,
+      min_entropy,
+      o,
+      ref2,
+      up_to_k;
   List<Match> match_sequence;
   bruteforce_cardinality = calcBruteforceCardinality(password);
 

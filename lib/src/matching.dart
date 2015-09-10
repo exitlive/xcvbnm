@@ -47,10 +47,10 @@ Map<String, int> buildRankedDict(List ordered_list) {
 
 Map<String, Map<String, int>> rankedDictionaries = {
   "passwords": buildRankedDict(frequencyLists["passwords"]),
-  "english":buildRankedDict(frequencyLists["english"]),
-  "surnames":buildRankedDict(frequencyLists["surnames"]),
-  "male_names":buildRankedDict(frequencyLists["male_names"]),
-  "female_names":buildRankedDict(frequencyLists["female_names"])
+  "english": buildRankedDict(frequencyLists["english"]),
+  "surnames": buildRankedDict(frequencyLists["surnames"]),
+  "male_names": buildRankedDict(frequencyLists["male_names"]),
+  "female_names": buildRankedDict(frequencyLists["female_names"])
 };
 
 class DictionaryMatch extends scoring.Match {
@@ -85,12 +85,10 @@ dictionaryMatch(password, [Map _ranked_dictionaries]) {
             ..token = password.substring(i, j + 1)
             ..matchedWord = word
             ..rank = rank
-            ..dictionaryName = dictionary_name
-          );
+            ..dictionaryName = dictionary_name);
         }
       }
     }
   });
   return sorted(matches);
-
 }

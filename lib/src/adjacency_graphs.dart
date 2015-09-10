@@ -2,7 +2,6 @@
 library xcvbnm.adjacency_graphs;
 
 class AdjacencyGraphs {
-
   AdjacencyGraphs._();
 
   Map qwerty = {
