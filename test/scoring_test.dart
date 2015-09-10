@@ -3,7 +3,7 @@ library xcvbnm.scoring_test;
 import 'package:test/test.dart';
 import 'dart:math' as math;
 import 'package:xcvbnm/src/scoring.dart';
-import 'package:xcvbnm/xcvbnm.dart' as xcvbnm;
+import 'package:xcvbnm/src/xcvbnm_common.dart' as xcvbnm;
 import 'dart:core' hide Match;
 
 main() {

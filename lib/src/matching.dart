@@ -123,11 +123,11 @@ List<scoring.Match> omnimatch(String password) {
   List<scoring.Match> matches = [];
   List<Function> matchers = [
     dictionaryMatch,
-    l33tMatch,
+    // l33tMatch, // TODO dart port test still fails for l33t
     spatialMatch,
     repeatMatch,
     sequenceMatch,
-    regexMatch,
+    // regexMatch, // TODO to implement, this hangs for now
     dateMatch
   ];
 
