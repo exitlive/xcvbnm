@@ -308,9 +308,7 @@ main() {
       token = ref1[0];
       ascending = ref1[1];
       entropy = ref1[2];
-      match = new Match()
-        ..token = token
-        ..ascending = ascending;
+      match = new SequenceMatch(token: token, ascending: ascending);
       msg = "the sequence pattern '${token}' has entropy of ${entropy}";
       expect(sequenceEntropy(match), entropy, reason: msg);
     }
@@ -375,7 +373,7 @@ main() {
 
   test('spatialEntropy', () {
     var L, base_entropy, d, entropy, i, j, l, msg, o, possibilities, ref, ref1, s, shifted_entropy;
-    SpatialMatch match = new SpatialMatch(token: 'zxcvbn', graph : 'qwerty', turns : 1, shiftedCount : 0);
+    SpatialMatch match = new SpatialMatch(token: 'zxcvbn', graph: 'qwerty', turns: 1, shiftedCount: 0);
     base_entropy = lg(keyboardStartingPositions * keyboardAverageDegree * (match.token.length - 1));
     msg = "with no turns or shifts, entropy is lg(starts * degree * (len-1))";
     expect(spatialEntropy(match), base_entropy, reason: msg);
@@ -392,7 +390,7 @@ main() {
     shifted_entropy = base_entropy + 1;
     msg = "when everything is shifted, only 1 bit is added";
     expect(spatialEntropy(match), shifted_entropy, reason: msg);
-    match = new SpatialMatch(token: 'zxcft6yh', graph : 'qwerty', turns : 3, shiftedCount : 0);
+    match = new SpatialMatch(token: 'zxcft6yh', graph: 'qwerty', turns: 3, shiftedCount: 0);
 
     possibilities = 0;
     L = match.token.length;

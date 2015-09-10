@@ -207,6 +207,14 @@ main() {
 
       // Check matching
       scoring.Match expectedMatch = expectedMatches[k];
+
+      if (expectedMatch.i != null) {
+        expect(expectedMatch.i, match.i, reason: msg);
+      }
+      if (expectedMatch.j != null) {
+        expect(expectedMatch.j, match.j, reason: msg);
+      }
+
       if (expectedMatch is DictionaryMatch) {
         DictionaryMatch foundMatch = match as DictionaryMatch;
         if (expectedMatch.matchedWord != null) {
@@ -226,12 +234,7 @@ main() {
         }
       } else if (expectedMatch is scoring.SpatialMatch) {
         scoring.SpatialMatch foundMatch = match as scoring.SpatialMatch;
-        if (expectedMatch.i != null) {
-          expect(expectedMatch.i, foundMatch.i, reason: msg);
-        }
-        if (expectedMatch.j != null) {
-          expect(expectedMatch.j, foundMatch.j, reason: msg);
-        }
+
         if (expectedMatch.token != null) {
           expect(expectedMatch.token, foundMatch.token, reason: msg);
         }
@@ -243,6 +246,15 @@ main() {
         }
         if (expectedMatch.graph != null) {
           expect(expectedMatch.shiftedCount, foundMatch.shiftedCount, reason: msg);
+        }
+      } else if (expectedMatch is scoring.SequenceMatch) {
+        scoring.SequenceMatch foundMatch = match as scoring.SequenceMatch;
+
+        if (expectedMatch.ascending != null) {
+          expect(expectedMatch.ascending, foundMatch.ascending, reason: msg);
+        }
+        if (expectedMatch.sequenceName != null) {
+          expect(expectedMatch.sequenceName, foundMatch.sequenceName, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -685,6 +697,120 @@ main() {
         [0, pattern.length - 1]
       ], [
         nsm(keyboard, turns, shifts)
+      ]);
+    });
+  });
+
+  test('sequence matching', () {
+    for (String password in ['', 'a', '1', 'ab']) {
+      expect(sequenceMatch(password), [], reason: "doesn't match length-#{password.length} sequences");
+    }
+    List<scoring.Match> matches = sequenceMatch('abcbabc');
+    String msg = "matches overlapping patterns";
+
+    nsm(bool ascending, [String sequenceName]) =>
+        new scoring.SequenceMatch(ascending: ascending, sequenceName: sequenceName);
+    checkMatches(msg, matches, 'sequence', [
+      'abc',
+      'cba',
+      'abc'
+    ], [
+      [0, 2],
+      [2, 4],
+      [4, 6]
+    ], [
+      nsm(true),
+      nsm(false),
+      nsm(true)
+    ]);
+    checkFailed(() => checkMatches(msg, matches, 'sequence', [
+          'abc',
+          'cba',
+          'abc'
+        ], [
+          [0, 2],
+          [2, 4],
+          [4, 6]
+        ], [
+          nsm(true),
+          nsm(true),
+          nsm(true)
+        ]));
+
+    expect(sequenceMatch('xyzabc').length, 1, reason: 'matches sequences that wrap from end to start');
+    expect(sequenceMatch('cbazyx').length, 1, reason: 'matches reverse sequences that wrap from start to end');
+
+    List prefixes = ['!', '22'];
+    List suffixes = ['!', '22'];
+    String pattern = 'jihg';
+    genPws(pattern, prefixes, suffixes).forEach((List row) {
+      String password = row[0];
+      int i = row[1];
+      int j = row[2];
+
+      matches = sequenceMatch(password);
+      msg = 'matches embedded sequence patterns';
+      checkMatches(msg, matches, 'sequence', [
+        pattern
+      ], [
+        [i, j]
+      ], [
+        nsm(false, 'lower')
+      ]);
+    });
+
+    // Check that the test if failing for wrong result
+    pattern = 'ABC';
+    checkMatches('correct', sequenceMatch(pattern), 'sequence', [
+      pattern
+    ], [
+      [0, pattern.length - 1]
+    ], [
+      nsm(true, 'upper')
+    ]);
+    checkFailed(() => checkMatches('invalid ascending', sequenceMatch(pattern), 'sequence', [
+          pattern
+        ], [
+          [0, pattern.length - 1]
+        ], [
+          nsm(false, 'upper')
+        ]));
+    checkFailed(() => checkMatches('invalid sequenceName', sequenceMatch(pattern), 'sequence', [
+          pattern
+        ], [
+          [0, pattern.length - 1]
+        ], [
+          nsm(true, 'lower')
+        ]));
+    [
+      ['ABC', 'upper', true],
+      ['CBA', 'upper', false],
+      ['PQR', 'upper', true],
+      ['RQP', 'upper', false],
+      ['XYZ', 'upper', true],
+      ['ZYX', 'upper', false],
+      ['abcd', 'lower', true],
+      ['dcba', 'lower', false],
+      ['jihg', 'lower', false],
+      ['wxyz', 'lower', true],
+      ['zyxw', 'lower', false],
+      ['01234', 'digits', true],
+      ['43210', 'digits', false],
+      ['67890', 'digits', true],
+      ['09876', 'digits', false]
+    ].forEach((List row) {
+      String pattern = row[0];
+      String name = row[1];
+      bool ascending = row[2];
+
+      matches = sequenceMatch(pattern);
+      msg = "matches '${pattern}' as a '${name}' sequence";
+      checkMatches(msg, matches, 'sequence', [
+        pattern
+      ], [
+        [0, pattern.length - 1]
+      ], [
+        nsm(ascending, name)
       ]);
     });
   });

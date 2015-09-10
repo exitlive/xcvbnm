@@ -68,6 +68,12 @@ Map<String, List<String>> l33tTable = {
   'z': ['2']
 };
 
+Map<String, String> sequences = {
+  'lower': 'abcdefghijklmnopqrstuvwxyz',
+  'upper': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  'digits': '0123456789'
+};
+
 class DictionaryMatch extends scoring.Match {
   DictionaryMatch({this.matchedWord, this.dictionaryName, int rank, Map<String, String> sub, bool l33t}) {
     this.rank = rank;
@@ -310,7 +316,7 @@ List<scoring.SpatialMatch> spatialMatch(String password, [Map<String, Map<String
 RegExp shiftedRx = new RegExp(r'[~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?]');
 
 List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<String>> graph, String graphName) {
-  List<scoring.Match> matches = [];
+  List<scoring.SpatialMatch> matches = [];
   int i = 0;
   while (i < password.length - 1) {
     int j = i + 1;
@@ -382,4 +388,46 @@ List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<
     }
   }
   return matches;
+}
+
+List<scoring.Match> sequenceMatch(String password) {
+  List<scoring.Match> matches = [];
+  int minSequenceLength = 3; // TODO allow 2-char sequences?
+
+  sequences.forEach((String sequenceName, String sequence) {
+    for (int direction in [1, -1]) {
+      int i = 0;
+      while (i < password.length) {
+        String chr = password[i];
+        int sequencePosition = sequence.indexOf(chr);
+        if (sequencePosition == -1) {
+          i += 1;
+          continue;
+        }
+        int j = i + 1;
+
+        while (j < password.length) {
+          // mod by sequence length to allow sequences to wrap around: xyzabc
+          int nextSequencePosition = mod(sequencePosition + direction, sequence.length);
+          if (sequence.indexOf(password[j]) != nextSequencePosition) {
+            break;
+          }
+          j += 1;
+          sequencePosition = nextSequencePosition;
+        }
+        j -= 1;
+        if (j - i + 1 >= minSequenceLength) {
+          matches.add(new scoring.SequenceMatch(
+              i: i,
+              j: j,
+              token: password.substring(i, j + 1),
+              sequenceName: sequenceName,
+              sequenceSpace: sequence.length,
+              ascending: direction == 1));
+        }
+        i = j + 1;
+      }
+    }
+  });
+  return sorted(matches);
 }

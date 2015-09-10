@@ -192,9 +192,6 @@ class Match extends xcvbnm.Match {
   // repeat/sequence/regex/spatial entropy
   String token;
 
-  // sequence entropy
-  bool ascending;
-
   // regex
   String regexName;
   List<String> regexMatch;
@@ -217,6 +214,19 @@ class Match extends xcvbnm.Match {
   int i;
   int j;
   int cardinality;
+}
+
+class SequenceMatch extends Match {
+  SequenceMatch({this.ascending, int i, int j, String token, this.sequenceName, this.sequenceSpace}) {
+    pattern = 'sequence';
+    this.i = i;
+    this.j = j;
+    this.token = token;
+  }
+  // sequence entropy
+  String sequenceName;
+  int sequenceSpace;
+  bool ascending;
 }
 
 class SpatialMatch extends Match {
@@ -268,7 +278,7 @@ num repeatEntropy(Match match) {
   return lg(cardinality * match.token.length);
 }
 
-num sequenceEntropy(Match match) {
+num sequenceEntropy(SequenceMatch match) {
   var base_entropy;
   String first_chr = match.token[0];
   if (['a', '1'].contains(first_chr)) {
