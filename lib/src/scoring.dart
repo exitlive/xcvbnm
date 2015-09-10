@@ -199,11 +199,6 @@ class Match extends xcvbnm.Match {
   String regexName;
   List<String> regexMatch;
 
-  // spatial
-  String graph;
-  int shiftedCount;
-  int turns;
-
   // dictionary
   int rank;
   num baseEntropy;
@@ -222,6 +217,19 @@ class Match extends xcvbnm.Match {
   int i;
   int j;
   int cardinality;
+}
+
+class SpatialMatch extends Match {
+  // spatial
+  String graph;
+  int shiftedCount;
+  int turns;
+  SpatialMatch({this.graph, this.shiftedCount, this.turns, int i, int j, String token}) {
+    pattern = 'spatial';
+    this.token = token;
+    this.i = i;
+    this.j = j;
+  }
 }
 
 typedef num _EntropyFunction(Match match);
@@ -333,11 +341,11 @@ _calcAverageDegree(Map graph) {
   return average;
 }
 
-final num keyboardAverageDegree = _calcAverageDegree(adjacencyGraphs.qwerty);
-final num keypadAverageDegree = _calcAverageDegree(adjacencyGraphs.keypad);
+final num keyboardAverageDegree = _calcAverageDegree(adjacencyGraphs["qwerty"]);
+final num keypadAverageDegree = _calcAverageDegree(adjacencyGraphs["keypad"]);
 final num keyboardStartingPositions = ((() {
   var ref, results;
-  ref = adjacencyGraphs.qwerty;
+  ref = adjacencyGraphs["qwerty"];
   results = [];
   for (var k in ref.keys) {
     //v = ref[k];
@@ -347,7 +355,7 @@ final num keyboardStartingPositions = ((() {
 })()).length;
 final num keypadStartingPositions = ((() {
   var results;
-  Map ref = adjacencyGraphs.keypad;
+  Map ref = adjacencyGraphs["keypad"];
   results = [];
   for (var k in ref.keys) {
     //v = ref[k];
@@ -356,7 +364,7 @@ final num keypadStartingPositions = ((() {
   return results;
 })()).length;
 
-num spatialEntropy(Match match) {
+num spatialEntropy(SpatialMatch match) {
   var L, S, U, d, entropy, i, j, l, m, o, possibilities, possible_turns, ref, ref1, ref2, ref3, s, t;
   if ((ref = match.graph) == 'qwerty' || ref == 'dvorak') {
     s = keyboardStartingPositions;

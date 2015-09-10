@@ -2,6 +2,7 @@ library xcvbnm.matching_test;
 
 import 'package:test/test.dart';
 import 'package:xcvbnm/src/matching.dart';
+import 'package:xcvbnm/src/adjacency_graphs.dart';
 import "package:xcvbnm/src/scoring.dart" as scoring;
 
 main() {
@@ -170,7 +171,7 @@ main() {
   checkMatches(String prefix, List<scoring.Match> matches, var patternNamesOrName, List<String> patterns,
       List<List<int>> ijs, List<scoring.Match> expectedMatches) {
     int i, j, k;
-    DictionaryMatch match;
+    scoring.Match match;
     String msg;
     String pattern;
 
@@ -207,20 +208,41 @@ main() {
       // Check matching
       scoring.Match expectedMatch = expectedMatches[k];
       if (expectedMatch is DictionaryMatch) {
+        DictionaryMatch foundMatch = match as DictionaryMatch;
         if (expectedMatch.matchedWord != null) {
-          expect(expectedMatch.matchedWord, match.matchedWord, reason: msg);
+          expect(expectedMatch.matchedWord, foundMatch.matchedWord, reason: msg);
         }
         if (expectedMatch.rank != null) {
-          expect(expectedMatch.rank, match.rank, reason: msg);
+          expect(expectedMatch.rank, foundMatch.rank, reason: msg);
         }
         if (expectedMatch.dictionaryName != null) {
-          expect(expectedMatch.dictionaryName, match.dictionaryName, reason: msg);
+          expect(expectedMatch.dictionaryName, foundMatch.dictionaryName, reason: msg);
         }
         if (expectedMatch.l33t != null) {
-          expect(expectedMatch.l33t, match.l33t, reason: msg);
+          expect(expectedMatch.l33t, foundMatch.l33t, reason: msg);
         }
         if (expectedMatch.sub != null) {
-          expect(expectedMatch.sub, match.sub, reason: msg);
+          expect(expectedMatch.sub, foundMatch.sub, reason: msg);
+        }
+      } else if (expectedMatch is scoring.SpatialMatch) {
+        scoring.SpatialMatch foundMatch = match as scoring.SpatialMatch;
+        if (expectedMatch.i != null) {
+          expect(expectedMatch.i, foundMatch.i, reason: msg);
+        }
+        if (expectedMatch.j != null) {
+          expect(expectedMatch.j, foundMatch.j, reason: msg);
+        }
+        if (expectedMatch.token != null) {
+          expect(expectedMatch.token, foundMatch.token, reason: msg);
+        }
+        if (expectedMatch.graph != null) {
+          expect(expectedMatch.graph, foundMatch.graph, reason: msg);
+        }
+        if (expectedMatch.turns != null) {
+          expect(expectedMatch.turns, foundMatch.turns, reason: msg);
+        }
+        if (expectedMatch.graph != null) {
+          expect(expectedMatch.shiftedCount, foundMatch.shiftedCount, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -587,5 +609,83 @@ main() {
     // TODO: consider partially fixing by trying all subsets of size 1 and maybe 2
 
     expect(lm('4sdf0'), [], reason: "doesn't match with subsets of possible l33t substitutions");
+  });
+
+  test('spatial matching', () {
+    for (String password in ['', '/', 'qw', '*/']) {
+      expect(spatialMatch(password), [], reason: "doesn't match 1- and 2-character spatial patterns");
+    }
+
+// for testing, make a subgraph that contains a single keyboard
+    Map _graphs = {"qwerty": adjacencyGraphs["qwerty"]};
+    String pattern = '6tfGHJ';
+    List<scoring.Match> matches = spatialMatch("rz!${pattern}%z", _graphs);
+
+    nsm(String graph, int turns, int shiftedCount) =>
+        new scoring.SpatialMatch(graph: graph, turns: turns, shiftedCount: shiftedCount);
+    String msg = "matches against spatial patterns surrounded by non-spatial patterns";
+    checkMatches(msg, matches, 'spatial', [
+      pattern
+    ], [
+      [3, 3 + pattern.length - 1]
+    ], [
+      nsm('qwerty', 2, 3)
+    ]);
+    // check changing any value of the result fails
+    checkFailed(() => checkMatches(msg, matches, 'spatial', [
+          pattern
+        ], [
+          [3, 3 + pattern.length - 1]
+        ], [
+          nsm('XXXXqwerty', 2, 3)
+        ]));
+    checkFailed(() => checkMatches(msg, matches, 'spatial', [
+          pattern
+        ], [
+          [3, 3 + pattern.length - 1]
+        ], [
+          nsm('qwerty', 1, 3)
+        ]));
+    checkFailed(() => checkMatches(msg, matches, 'spatial', [
+          pattern
+        ], [
+          [3, 3 + pattern.length - 1]
+        ], [
+          nsm('qwerty', 2, 4)
+        ]));
+
+    [
+      ['12345', 'qwerty', 1, 0],
+      ['@WSX', 'qwerty', 1, 4],
+      ['6tfGHJ', 'qwerty', 2, 3],
+      ['hGFd', 'qwerty', 1, 2],
+      ['/;p09876yhn', 'qwerty', 3, 0],
+      ['Xdr%', 'qwerty', 1, 2],
+      ['159-', 'keypad', 1, 0],
+      ['*84', 'keypad', 1, 0],
+      ['/8520', 'keypad', 1, 0],
+      ['369', 'keypad', 1, 0],
+      ['/963.', 'mac_keypad', 1, 0],
+      ['*-632.0214', 'mac_keypad', 9, 0],
+      ['aoEP%yIxkjq:', 'dvorak', 4, 5],
+      [';qoaOQ:Aoq;a', 'dvorak', 11, 4]
+    ].forEach((List row) {
+      String pattern = row[0];
+      String keyboard = row[1];
+      int turns = row[2];
+      int shifts = row[3];
+
+      _graphs = {};
+      _graphs[keyboard] = adjacencyGraphs[keyboard];
+      matches = spatialMatch(pattern, _graphs);
+      msg = "matches '${pattern}' as a ${keyboard} pattern";
+      checkMatches(msg, matches, 'spatial', [
+        pattern
+      ], [
+        [0, pattern.length - 1]
+      ], [
+        nsm(keyboard, turns, shifts)
+      ]);
+    });
   });
 }

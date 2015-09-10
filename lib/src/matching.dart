@@ -2,6 +2,7 @@ library xcvbnm.matching;
 
 import "scoring.dart" as scoring;
 import 'frequency_lists.dart';
+import 'adjacency_graphs.dart';
 
 bool empty(var obj) {
   return obj.isEmpty;
@@ -24,7 +25,7 @@ String translate(String string, Map chr_map) {
 
 int mod(int n, int m) => ((n % m) + m) % m;
 
-sorted(List<scoring.Match> matches) {
+List<scoring.Match> sorted(List<scoring.Match> matches) {
   matches.sort((m1, m2) {
     int iDiff = (m1.i - m2.i);
     if (iDiff == 0) {
@@ -286,6 +287,99 @@ List<DictionaryMatch> l33tMatch(String password,
         matches.add(match);
       }
     });
+  }
+  return matches;
+}
+
+/**
+ * spatial match (qwerty/dvorak/keypad)
+ */
+
+List<scoring.SpatialMatch> spatialMatch(String password, [Map<String, Map<String, List<String>>> graphs_]) {
+  if (graphs_ == null) {
+    graphs_ = adjacencyGraphs;
+  }
+  List<scoring.Match> matches = [];
+  graphs_.forEach((graphName, graph) {
+    matches.addAll(spatialMatchHelper(password, graph, graphName));
+  });
+  sorted(matches);
+  return matches;
+}
+
+RegExp shiftedRx = new RegExp(r'[~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?]');
+
+List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<String>> graph, String graphName) {
+  List<scoring.Match> matches = [];
+  int i = 0;
+  while (i < password.length - 1) {
+    int j = i + 1;
+    int lastDirection = null;
+    int turns = 0;
+    int shiftedCount;
+    if (['qwerty', 'dvorak'].contains(graphName) && shiftedRx.hasMatch(password.substring(i, j))) {
+      // initial character is shifted
+      shiftedCount = 1;
+    } else {
+      shiftedCount = 0;
+    }
+    while (true) {
+      String prevChar = password.substring(j - 1, j);
+      bool found = false;
+      int foundDirection = -1;
+      int curDirection = -1;
+
+      List<String> adjacents = graph[prevChar];
+      if (adjacents == null) {
+        adjacents = [];
+      }
+
+      // consider growing pattern by one character if j hasn't gone over the edge.
+      if (j < password.length) {
+        String curChar = password.substring(j, j + 1);
+        for (String adj in adjacents) {
+          curDirection += 1;
+          if ((adj != null) && (adj.indexOf(curChar) != -1)) {
+            found = true;
+            foundDirection = curDirection;
+            if (adj.indexOf(curChar) == 1) {
+              // index 1 in the adjacency means the key is shifted,
+              // 0 means unshifted: A vs a, % vs 5, etc.
+              // for example, 'q' is adjacent to the entry '2@'.
+              // @ is shifted w/ index 1, 2 is unshifted.
+              shiftedCount += 1;
+            }
+            if (lastDirection != foundDirection) {
+              // adding a turn is correct even in the initial case when last_direction is null:
+              // every spatial pattern starts with a turn.
+              turns += 1;
+              lastDirection = foundDirection;
+            }
+            break;
+          }
+        }
+      }
+      // if the current pattern continued, extend j and try to grow again
+      if (found) {
+        j += 1;
+      } else {
+        // otherwise push the pattern discovered so far, if any...
+        if (j - i > 2) {
+          // don't consider length 1 or 2 chains.
+
+          matches.add(new scoring.SpatialMatch(
+              i: i,
+              j: j - 1,
+              token: password.substring(i, j),
+              graph: graphName,
+              turns: turns,
+              shiftedCount: shiftedCount));
+        }
+        // ...and then start a new search for the rest of the password.
+        i = j;
+        break;
+      }
+    }
   }
   return matches;
 }
