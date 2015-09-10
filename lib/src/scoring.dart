@@ -180,14 +180,7 @@ class Match extends xcvbnm.Match {
 
   num entropy;
 
-  // date entropy
-  int year;
-  int month;
-  int day;
-
-  // ?? never used
-  bool hasFullYear;
-  String separator;
+  Match({this.pattern, this.i, this.j, this.token});
 
   // repeat/sequence/regex/spatial entropy
   String token;
@@ -203,6 +196,7 @@ class Match extends xcvbnm.Match {
   bool l33t;
   num l33tEntropy;
   Map<String, String> sub;
+
   String get subDisplay {
     if (sub == null) {
       return null;
@@ -214,6 +208,25 @@ class Match extends xcvbnm.Match {
   int i;
   int j;
   int cardinality;
+
+  toMap() {
+    Map map = {};
+    if (pattern != null) {
+      map["pattern"] = pattern;
+    }
+    if (token != null) {
+      map["token"] = token;
+    }
+    if (i != null) {
+      map["i"] = i;
+    }
+    if (j != null) {
+      map["j"] = j;
+    }
+    return map;
+  }
+
+  toString() => toMap().toString();
 }
 
 class SequenceMatch extends Match {
@@ -223,6 +236,7 @@ class SequenceMatch extends Match {
     this.j = j;
     this.token = token;
   }
+
   // sequence entropy
   String sequenceName;
   int sequenceSpace;
@@ -234,11 +248,44 @@ class SpatialMatch extends Match {
   String graph;
   int shiftedCount;
   int turns;
+
   SpatialMatch({this.graph, this.shiftedCount, this.turns, int i, int j, String token}) {
     pattern = 'spatial';
     this.token = token;
     this.i = i;
     this.j = j;
+  }
+}
+
+class DateMatch extends Match {
+  // date entropy
+  int year;
+  int month;
+  int day;
+
+  // ?? never used
+  bool hasFullYear;
+  String separator;
+
+  DateMatch({this.year, this.month, this.day, this.separator, this.hasFullYear, String token, int i, int j})
+      : super(pattern: 'date', i: i, j: j, token: token);
+
+  @override
+  Map<String, Object> toMap() {
+    Map map = super.toMap();
+    if (year != null) {
+      map['year'] = year;
+    }
+    if (month != null) {
+      map['month'] = month;
+    }
+    if (day != null) {
+      map['day'] = day;
+    }
+    if (separator != null) {
+      map['separator'] = separator;
+    }
+    return map;
   }
 }
 
@@ -259,7 +306,7 @@ num calcEntropy(Match match) {
   return match.entropy = entropy_functions[match.pattern](match);
 }
 
-num dateEntropy(Match match) {
+num dateEntropy(DateMatch match) {
   var entropy, year_space;
   year_space = math.max((match.year - referenceYear).abs(), minYearSpace);
   entropy = lg(year_space * 31 * 12);

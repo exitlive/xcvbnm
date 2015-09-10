@@ -193,7 +193,7 @@ main() {
     expect(patternNames.length, ijs.length, reason: msg);
     expect(patternNames.length, expectedMatches.length, reason: msg);
 
-    expect(expectedMatches.length, patterns.length, reason: "${prefix}: matches.length == ${patterns.length}");
+    expect(matches.length, patterns.length, reason: "${prefix}: matches.length == ${patterns.length}");
     for (k = 0; k < patterns.length; k++) {
       match = matches[k];
       String patternName = patternNames[k];
@@ -255,6 +255,24 @@ main() {
         }
         if (expectedMatch.sequenceName != null) {
           expect(expectedMatch.sequenceName, foundMatch.sequenceName, reason: msg);
+        }
+      } else if (expectedMatch is scoring.DateMatch) {
+        scoring.DateMatch foundMatch = match as scoring.DateMatch;
+
+        if (expectedMatch.year != null) {
+          expect(expectedMatch.year, foundMatch.year, reason: msg);
+        }
+        if (expectedMatch.month != null) {
+          expect(expectedMatch.month, foundMatch.month, reason: msg);
+        }
+        if (expectedMatch.day != null) {
+          expect(expectedMatch.day, foundMatch.day, reason: msg);
+        }
+        if (expectedMatch.hasFullYear != null) {
+          expect(expectedMatch.hasFullYear, foundMatch.hasFullYear, reason: msg);
+        }
+        if (expectedMatch.separator != null) {
+          expect(expectedMatch.separator, foundMatch.separator, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -813,5 +831,173 @@ main() {
         nsm(ascending, name)
       ]);
     });
+  });
+
+  // dart specific test
+  test('mapIntsToDmy', () {
+    expect(mapIntsToDmy([12, 20, 919]), isNull);
+  });
+
+  test('date matching', () {
+    List<scoring.DateMatch> matches;
+    String msg;
+
+    ndm(String separator, int year, [int month, int day]) =>
+        new scoring.DateMatch(separator: separator, year: year, month: month, day: day);
+
+    for (String sep in ['', ' ', '-', '/', '\\', '_', '.']) {
+      String password = "13${sep}2${sep}1921";
+      matches = dateMatch(password);
+      msg = "matches dates that use '${sep}' as a separator";
+      checkMatches(msg, matches, 'date', [
+        password
+      ], [
+        [0, password.length - 1]
+      ], [
+        ndm(sep, 1921, 2, 13)
+      ]);
+    }
+
+    for (String order in ['mdy', 'dmy', 'ymd', 'ydm']) {
+      int d = 8;
+      int m = 8;
+      int y = 88;
+      String password = order.replaceAll('y', "$y").replaceAll('m', '$m').replaceAll('d', '$d');
+      matches = dateMatch(password);
+      msg = "matches dates with '${order}' format";
+      checkMatches(msg, matches, 'date', [
+        password
+      ], [
+        [0, password.length - 1]
+      ], [
+        ndm('', 1988, 8, 8)
+      ]);
+    }
+
+    String password = '111504';
+    matches = matches = dateMatch(password);
+    msg = "matches the date with year closest to REFERENCE_YEAR when ambiguous";
+    // # picks '04' -> 2004 as year, not '1504'
+    checkMatches(msg, matches, 'date', [
+      password
+    ], [
+      [0, password.length - 1]
+    ], [
+      ndm('', 2004, 11, 15)
+    ]);
+    checkFailed(() => checkMatches(msg, matches, 'date', [
+          password
+        ], [
+          [0, password.length - 1]
+        ], [
+          ndm('_', 2004, 11, 15)
+        ]));
+    checkFailed(() => checkMatches(msg, matches, 'date', [
+          password
+        ], [
+          [0, password.length - 1]
+        ], [
+          ndm('_', 2005, 11, 15)
+        ]));
+    checkFailed(() => checkMatches(msg, matches, 'date', [
+          password
+        ], [
+          [0, password.length - 1]
+        ], [
+          ndm('_', 2004, 10, 15)
+        ]));
+    checkFailed(() => checkMatches(msg, matches, 'date', [
+          password
+        ], [
+          [0, password.length - 1]
+        ], [
+          ndm('_', 2004, 11, 16)
+        ]));
+
+    for (List row in [
+      [1, 1, 1999],
+      [11, 8, 2000],
+      [9, 12, 2005],
+      [22, 11, 1551],
+    ]) {
+      int day = row[0];
+      int month = row[1];
+      int year = row[2];
+
+      password = "${year}${month}${day}";
+      matches = dateMatch(password);
+      msg = "matches ${password}";
+      checkMatches(msg, matches, 'date', [
+        password
+      ], [
+        [0, password.length - 1]
+      ], [
+        ndm('', year)
+      ]);
+
+      password = "${year}.${month}.${day}";
+      matches = dateMatch(password);
+      msg = "matches ${password}";
+      checkMatches(msg, matches, 'date', [
+        password
+      ], [
+        [0, password.length - 1]
+      ], [
+        ndm('.', year)
+      ]);
+    }
+
+    password = "02/02/02";
+    matches = dateMatch(password);
+    msg = "matches zero-padded dates";
+    checkMatches(msg, matches, 'date', [
+      password
+    ], [
+      [0, password.length - 1]
+    ], [
+      ndm('/', 2002, 2, 2)
+    ]);
+
+    List prefixes = ['a', 'ab'];
+    List suffixes = ['!'];
+    String pattern = '1/1/91';
+    for (List row in genPws(pattern, prefixes, suffixes)) {
+      String password = row[0];
+      int i = row[1];
+      int j = row[2];
+
+      matches = matches = dateMatch(password);
+      msg = "matches embedded dates";
+      checkMatches(msg, matches, 'date', [
+        pattern
+      ], [
+        [i, j]
+      ], [
+        ndm(null, 1991, 1, 1)
+      ]);
+    }
+
+    matches = dateMatch('12/20/1991.12.20');
+    msg = "matches overlapping dates";
+    checkMatches(msg, matches, 'date', [
+      '12/20/1991',
+      '1991.12.20'
+    ], [
+      [0, 9],
+      [6, 15]
+    ], [
+      ndm('/', 1991, 12, 20),
+      ndm('.', 1991, 12, 20)
+    ]);
+
+    matches = dateMatch('912/20/919');
+    msg = "matches dates padded by non-ambiguous digits";
+    checkMatches(msg, matches, 'date', [
+      '12/20/91'
+    ], [
+      [1, 8]
+    ], [
+      ndm('/', 1991, 12, 20)
+    ]);
   });
 }
