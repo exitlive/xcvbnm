@@ -25,7 +25,7 @@ main() {
     List<String> lines = [
       "----- Result ------",
       "password:           ${result.password}",
-      "entry:              ${result.entropy}",
+      "entropy:            ${result.entropy}",
       "crack_time:         ${new Duration(milliseconds: result.crackTime)}",
       "crack_time_display: ${result.crackTimeDisplay}",
       "score from 0 to 4:  ${result.score}",
@@ -53,15 +53,15 @@ main() {
         if (match is scoring.Match) {
           lines.add("'${match.token}'");
           lines.add("pattern:       '${match.pattern}'");
-          lines.add("entropy:       '${match.entropy}'");
+          lines.add("entropy:       ${match.entropy}");
           if (match.rank != null) {
-            lines.add("rank:          '${match.rank}'");
+            lines.add("rank:          ${match.rank}");
           }
           if (match.baseEntropy != null) {
-            lines.add("base_entropy:  '${match.baseEntropy}'");
+            lines.add("base_entropy:  ${match.baseEntropy}");
           }
           if (match.uppercaseEntropy != null) {
-            lines.add("upper_entropy: '${match.uppercaseEntropy}'");
+            lines.add("upper_entropy: ${match.uppercaseEntropy}");
           }
         }
         for (String line in lines) {

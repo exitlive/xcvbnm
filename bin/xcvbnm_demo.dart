@@ -41,7 +41,7 @@ main(List<String> args) {
 
     print("----- Result ------");
     print("password:           ${result.password}");
-    print("entry:              ${result.entropy}");
+    print("entropy:              ${result.entropy}");
     print("crack_time:         ${new Duration(milliseconds: result.crackTime)}");
     print("crack_time_display: ${result.crackTimeDisplay}");
     print("score from 0 to 4:  ${result.score}");
@@ -55,19 +55,20 @@ main(List<String> args) {
         print("----- match ${i++}/${result.matchSequence.length}");
         if (match is scoring.Match) {
           print("'${match.token}'");
-          print("pattern: '${match.pattern}'");
-          print("entropy: '${match.entropy}'");
+          print("pattern:      '${match.pattern}'");
+          print("entropy:       ${match.entropy}");
           if (match.rank != null) {
-            print("rank:    '${match.rank}'");
+            print("rank:          ${match.rank}");
           }
           if (match.baseEntropy != null) {
-            print("base_entropy: '${match.baseEntropy}'");
+            print("base_entropy:  ${match.baseEntropy}");
           }
           if (match.uppercaseEntropy != null) {
-            print("upper_entropy: '${match.uppercaseEntropy}'");
+            print("upper_entropy: ${match.uppercaseEntropy}");
           }
         }
       }
     }
+    print("");
   }
 }
