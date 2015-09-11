@@ -2,7 +2,7 @@
 library xcvbnm.bin;
 
 import 'package:args/args.dart';
-import 'package:xcvbnm/src/xcvbnm_impl.dart';
+import 'package:xcvbnm/xcvbnm.dart';
 import 'package:xcvbnm/src/scoring.dart' as scoring;
 
 const String _HELP = 'help';
@@ -10,8 +10,6 @@ const String _MATCH = 'match';
 const String _DEPENDENCY = 'dependency';
 
 main(List<String> args) {
-  var xcvbnm = new Xcvbnm();
-
   int maxMatchToDisplay = 4;
 
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
@@ -39,7 +37,7 @@ main(List<String> args) {
     passwords = testPasswords.split('\n');
   }
   for (String password in passwords) {
-    var result = xcvbnm.estimate(password);
+    Result result = xcvbnm(password);
 
     print("----- Result ------");
     print("password:           ${result.password}");

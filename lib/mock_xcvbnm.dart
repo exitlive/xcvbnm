@@ -1,6 +1,7 @@
 library xcvbnm.mock;
 
 import 'src/xcvbnm_common.dart' hide Xcvbnm;
+export 'src/xcvbnm_common.dart' hide Xcvbnm;
 export 'src/mock_xcvbnm_impl.dart';
 import 'src/mock_xcvbnm_impl.dart';
 

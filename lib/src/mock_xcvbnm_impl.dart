@@ -14,6 +14,8 @@ class Xcvbnm extends common.Xcvbnm {
   }
 
   Result estimate(String password, {List<String> userInputs}) {
-    return new Result()..score = getNaiveScore(password);
+    return new Result()
+      ..score = getNaiveScore(password)
+      ..password = password;
   }
 }
