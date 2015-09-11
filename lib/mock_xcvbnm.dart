@@ -5,7 +5,7 @@ export 'src/mock_xcvbnm_impl.dart';
 import 'src/mock_xcvbnm_impl.dart';
 
 /**
- * the one and only entrypoint needed
+ * the one and only entrypoint needed for the mock implementation
  */
 Result xcvbnm(String password, {List<String> userInputs}) {
   Xcvbnm impl = new Xcvbnm();

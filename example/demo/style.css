@@ -1,5 +1,15 @@
 body {
     font-size: smaller;
+    font-family: monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+input {
+    font-family: monospace;
 }
 
 pre {
@@ -8,7 +18,9 @@ pre {
 
 .app-result {
     clear: both;
-    padding: 12px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
 }
 
 .app-match {
@@ -17,4 +29,18 @@ pre {
 }
 
 .app-line {
+}
+
+#app_password_content {
+
+}
+
+#app_content, #app_intro {
+    width: 100%;
+    background-color: #EEE;
+    padding: 8px;
+}
+
+#app_dynamic {
+    padding: 8px;
 }
