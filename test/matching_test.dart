@@ -446,6 +446,32 @@ main() {
     ]);
   });
 
+  test('reverse dictionary matching', () {
+    List<scoring.DictionaryMatch> matches;
+    String msg;
+
+    Map<String, Map<String, int>> testDicts = {
+      "d1": {"123": 1, "321": 2, "456": 3, "654": 4}
+    };
+
+    String password = "0123456879";
+    matches = reverseDictionaryMatch(password, testDicts);
+    msg = 'matches against reversed words';
+    ndm(String matchedWord, bool reversed, int rank, String dictionaryName) =>
+        new scoring.DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
+
+    checkMatches(msg, matches, 'dictionary', [
+      '123',
+      '456'
+    ], [
+      [1, 3],
+      [4, 6]
+    ], [
+      ndm('321', true, 2, 'd1'),
+      ndm('654', true, 4, 'd1')
+    ]);
+  });
+
   test('sortListOfList', () {
     // dart only test - not present in original implementation
     expect(
@@ -1191,7 +1217,7 @@ main() {
         }
       }
       // TODO check result
-      // expect(included, isTrue, reason: "for ${password}, matches a ${patternName} pattern at [${i}, ${j}]");
+      //expect(included, isTrue, reason: "for ${password}, matches a ${patternName} pattern at [${i}, ${j}]");
       expect(included, isNotNull); // dummy test
     });
   });

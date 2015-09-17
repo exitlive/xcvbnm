@@ -137,7 +137,8 @@ List<scoring.Match> omnimatch(String password) {
   List<scoring.Match> matches = [];
   List<Function> matchers = [
     dictionaryMatch,
-    // l33tMatch, // TODO dart port test still fails for l33t
+    reverseDictionaryMatch,
+    //l33tMatch, // TODO dart port test still fails for l33t
     spatialMatch,
     repeatMatch,
     sequenceMatch,
@@ -151,6 +152,10 @@ List<scoring.Match> omnimatch(String password) {
 
   return sorted(matches);
 }
+
+/**
+ * dictionary match (common passwords, english, last names, etc) ----------------
+ */
 
 List<scoring.DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_]) {
   // _ranked_dictionaries variable is for unit testing purposes
@@ -181,6 +186,38 @@ List<scoring.DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_
   });
   return sorted(matches);
 }
+
+List<scoring.DictionaryMatch> reverseDictionaryMatch(password, [Map rankedDictionaries_]) {
+  if (rankedDictionaries_ == null) {
+    rankedDictionaries_ = rankedDictionaries;
+  }
+  String reversePassword = password.split('').reversed.join();
+  List<scoring.DictionaryMatch> matches = dictionaryMatch(reversePassword, rankedDictionaries_);
+  for (var match in matches) {
+    match.token = match.token.split('').reversed.join(); // reverse back
+    match.reversed = true;
+    int i = password.length - 1 - match.j;
+    int j = password.length - 1 - match.i;
+    match.i = i;
+    match.j = j;
+  }
+  return sorted(matches);
+}
+
+/*
+reverse_dictionary_match: (password, _ranked_dictionaries = RANKED_DICTIONARIES) ->
+reversed_password = password.split('').reverse().join('')
+matches = @dictionary_match reversed_password, _ranked_dictionaries
+for match in matches
+match.token = match.token.split('').reverse().join('') # reverse back
+match.reversed = true
+# map coordinates back to original string
+[match.i, match.j] = [
+password.length - 1 - match.j
+password.length - 1 - match.i
+]
+@sorted matches
+*/
 
 // makes a pruned copy of l33t_table that only includes password's possible substitutions
 Map<String, List<String>> relevantL33tSubtable(String password, Map<String, List<String>> table) {
