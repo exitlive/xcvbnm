@@ -68,45 +68,30 @@ int crackTimeToScore(seconds) {
 }
 
 int calcBruteforceCardinality(String password) {
-  var c,
-      cp,
-      digits,
-      l,
-      latin1_letters,
-      latin1_symbols,
-      len,
-      len1,
-      lower,
-      m,
-      max_cp,
-      min_cp,
-      ord,
-      range,
-      ref1,
-      ref2,
-      symbols,
-      upper;
+  var c, cp;
+  bool digits, latin1Letters, latin1Symbols;
+  bool lower;
+  int maxCp, minCp;
+  var range;
+  bool symbols, upper;
 
-  List unicode_codepoints = [];
-  ref1 = password.split('');
-  len = ref1.length;
-  for (l = 0; l < len; l++) {
-    String chr = ref1[l];
-    ord = chr.codeUnitAt(0);
+  List unicodeCodepoints = [];
+
+  for (int ord in password.codeUnits) {
     if ((0x30 <= ord && ord <= 0x39)) {
       digits = true;
-    } else if ((0x41 <= ord && ord <= 0x5a)) {
+    } else if (0x41 <= ord && ord <= 0x5a) {
       upper = true;
-    } else if ((0x61 <= ord && ord <= 0x7a)) {
+    } else if (0x61 <= ord && ord <= 0x7a) {
       lower = true;
     } else if (ord <= 0x7f) {
       symbols = true;
-    } else if ((0x80 <= ord && ord <= 0xBF)) {
-      latin1_symbols = true;
-    } else if ((0xC0 <= ord && ord <= 0xFF)) {
-      latin1_letters = true;
+    } else if (0x80 <= ord && ord <= 0xBF) {
+      latin1Symbols = true;
+    } else if (0xC0 <= ord && ord <= 0xFF) {
+      latin1Letters = true;
     } else if (ord > 0xFF) {
-      unicode_codepoints.add(ord);
+      unicodeCodepoints.add(ord);
     }
   }
   c = 0;
@@ -122,26 +107,30 @@ int calcBruteforceCardinality(String password) {
   if (symbols == true) {
     c += 33;
   }
-  if (latin1_symbols == true) {
+  if (latin1Symbols == true) {
     c += 64;
   }
-  if (latin1_letters == true) {
+  if (latin1Letters == true) {
     c += 64;
   }
-  if (unicode_codepoints.length > 0) {
-    min_cp = max_cp = unicode_codepoints[0];
-    ref2 = unicode_codepoints.sublist(1);
-    len1 = ref2.length;
-    for (m = 0; m < len1; m++) {
-      cp = ref2[m];
-      if (cp < min_cp) {
-        min_cp = cp;
+  if (unicodeCodepoints.length > 0) {
+    minCp = maxCp = unicodeCodepoints[0];
+    for (int i = 0; i < unicodeCodepoints.length; i++) {
+      cp = unicodeCodepoints[i];
+      if (cp < minCp) {
+        minCp = cp;
       }
-      if (cp > max_cp) {
-        max_cp = cp;
+      if (cp > maxCp) {
+        maxCp = cp;
       }
     }
-    range = max_cp - min_cp + 1;
+    // if the range between unicode codepoints is small,
+    // assume one extra alphabet is in use (eg cyrillic, korean) and add a ballpark +40
+    //
+    // if the range is large, be very conservative and add +100 instead of the range.
+    // (codepoint distance between chinese chars can be many thousand, for example,
+    // but that cardinality boost won't be justified if the characters are common.)
+    range = maxCp - minCp + 1;
     if (range < 40) {
       range = 40;
     }
