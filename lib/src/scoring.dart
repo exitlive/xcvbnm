@@ -6,13 +6,19 @@ import "xcvbnm_common.dart" as xcvbnm;
 import 'dart:core';
 import 'dart:core' as core;
 
+// single guess time (10ms) over number of cores guessing in parallel
+// for a hash function like bcrypt/scrypt/PBKDF2, 10ms per guess is a safe lower bound.
+// (usually a guess would take longer -- this assumes fast hardware and a small work factor.)
+// adjust for your site accordingly if you use another hash function, possibly by
+// several orders of magnitude!
 const num _secondsPerGuess = .010 / 100;
+
 const int minYearSpace = 20;
 const int referenceYear = 2000;
 
 num nCk(n, k) {
   // http://blog.plover.com/math/choose.html
-  var d, l, r, ref;
+  var d, r;
   if (k > n) {
     return 0;
   }
@@ -32,8 +38,17 @@ num lg(num n) {
   return math.log(n) / math.log(2);
 }
 
+/**
+ * threat model -- stolen hash catastrophe scenario
+ *
+ * passwords are stored as salted hashes, different random salt per user.
+ *   (making rainbow attacks infeasable.)
+ * hashes and salts were stolen. attacker is guessing passwords at max rate.
+ * attacker has several CPUs at their disposal.
+ */
+
 num entropyToCrackTime(num entropy) {
-  return .5 * math.pow(2, entropy) * _secondsPerGuess;
+  return .5 * math.pow(2, entropy) * _secondsPerGuess; // .5 for average vs total
 }
 
 int crackTimeToScore(seconds) {

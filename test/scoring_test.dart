@@ -10,8 +10,8 @@ main() {
   const num epsilon = 1e-10;
 
   test('nCk', () {
-    var k, l, len, n, ref, ref1, result;
-    ref = [
+    var k, n, result;
+    for (List row in [
       [0, 0, 1],
       [1, 0, 1],
       [5, 0, 1],
@@ -20,13 +20,10 @@ main() {
       [2, 1, 2],
       [4, 2, 6],
       [33, 7, 4272048]
-    ];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      n = ref1[0];
-      k = ref1[1];
-      result = ref1[2];
+    ]) {
+      n = row[0];
+      k = row[1];
+      result = row[2];
       expect(nCk(n, k), result);
     }
     n = 49;
@@ -36,19 +33,15 @@ main() {
   });
 
   test('lg', () {
-    var l, len, n, p, ref, ref1, result;
-    ref = [
+    var n, p, result;
+    for (List row in [
       [1, 0],
       [2, 1],
       [4, 2],
       [32, 5]
-    ];
-
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      n = ref1[0];
-      result = ref1[1];
+    ]) {
+      n = row[0];
+      result = row[1];
       expect(lg(n), result);
     }
     n = 17;
@@ -61,41 +54,25 @@ main() {
   });
 
   test('entropyToCrackTime', () {
-    var e, e0, e1, e2, e3, l, len, n, ref;
-    var results;
-    ref = [0, 1, 7, 60];
-    results = [];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      n = ref[l];
-      results.add(entropyToCrackTime(n));
+    List e = [];
+    for (int n in [0, 1, 7, 60]) {
+      e.add(entropyToCrackTime(n));
     }
-    e0 = ref[0];
-    e1 = ref[1];
-    e2 = ref[2];
-    e3 = ref[3];
-
-    expect(e0 < e1 && e1 < e2 && e2 < e3, isTrue, reason: "monotonically increasing");
-    for (l = 0; l < len; l++) {
-      e = results[l];
-      expect(e, greaterThan(0), reason: "always positive");
+    expect(e[0] < e[1] && e[1] < e[2] && e[2] < e[3], isTrue, reason: "monotonically increasing");
+    for (var en in e) {
+      expect(en, greaterThan(0), reason: "always positive");
     }
   });
 
   test('crackTimeToScore', () {
-    var l, len, msg, ref, ref1, score, seconds;
-    ref = [
+    for (List row in [
       [0, 0],
       [10, 0],
       [math.pow(10, 9), 4]
-    ];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      seconds = ref1[0];
-      score = ref1[1];
-      msg = "crack time of ${seconds} seconds has score of ${score}";
-      expect(crackTimeToScore(seconds), score, reason: msg);
+    ]) {
+      var seconds = row[0];
+      var score = row[1];
+      expect(crackTimeToScore(seconds), score, reason: "crack time of ${seconds} seconds has score of ${score}");
     }
   });
 
