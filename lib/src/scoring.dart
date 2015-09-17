@@ -426,7 +426,7 @@ final num keypadStartingPositions = ((() {
 })()).length;
 
 num spatialEntropy(SpatialMatch match) {
-  var L, S, U, d, entropy, possibilities, possibleTurns, s, t;
+  var tokenLength, sc, uc, d, entropy, possibilities, possibleTurns, s, t;
   if (['qwerty', 'dvorak'].contains(match.graph)) {
     s = keyboardStartingPositions;
     d = keyboardAverageDegree;
@@ -435,9 +435,9 @@ num spatialEntropy(SpatialMatch match) {
     d = keypadAverageDegree;
   }
   possibilities = 0;
-  L = match.token.length;
+  tokenLength = match.token.length;
   t = match.turns;
-  for (int i = 2; i <= L; i++) {
+  for (int i = 2; i <= tokenLength; i++) {
     possibleTurns = math.min(t, i - 1);
     for (int j = 1; j <= possibleTurns; j++) {
       possibilities += nCk(i - 1, j - 1) * s * math.pow(d, j);
@@ -447,14 +447,14 @@ num spatialEntropy(SpatialMatch match) {
   // add extra entropy for shifted keys. (% instead of 5, A instead of a.)
   // math is similar to extra entropy of l33t substitutions in dictionary matches.
   if (match.shiftedCount != null && match.shiftedCount > 0) {
-    S = match.shiftedCount;
-    U = match.token.length - match.shiftedCount;
-    if (U == 0) {
+    sc = match.shiftedCount;
+    uc = match.token.length - match.shiftedCount;
+    if (uc == 0) {
       entropy += 1;
     } else {
       possibilities = 0;
-      for (int i = 1; i <= math.min(S, U); i++) {
-        possibilities += nCk(S + U, i);
+      for (int i = 1; i <= math.min(sc, uc); i++) {
+        possibilities += nCk(sc + uc, i);
       }
       entropy += lg(possibilities);
     }
@@ -690,13 +690,13 @@ xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) 
   // final result object
   return new xcvbnm.Result()
     ..password = password
-    ..entropy = round_to_x_digits(minEntropy, 3)
+    ..entropy = roundToXDigits(minEntropy, 3)
     ..matchSequence = matchSequence
-    ..crackTime = round_to_x_digits(crackTime, 3)
+    ..crackTime = roundToXDigits(crackTime, 3)
     ..crackTimeDisplay = displayTime(crackTime)
     ..score = crackTimeToScore(crackTime);
 }
 
-int round_to_x_digits(n, x) {
+int roundToXDigits(n, x) {
   return ((n * math.pow(10, x)) / math.pow(10, x)).round();
 }
