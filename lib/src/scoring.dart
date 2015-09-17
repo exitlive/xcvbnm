@@ -143,7 +143,7 @@ int calcBruteforceCardinality(String password) {
 }
 
 String displayTime(num seconds) {
-  var base, century, day, display_num, display_str, hour, minute, month, ref, year;
+  var century, day, displayNum, displayStr, hour, minute, month, year;
   minute = 60;
   hour = minute * 60;
   day = hour * 24;
@@ -151,31 +151,30 @@ String displayTime(num seconds) {
   year = month * 12;
   century = year * 100;
   if (seconds < minute) {
-    ref = [seconds, "${seconds} second"];
+    displayNum = seconds;
+    displayStr = "${seconds} second";
   } else if (seconds < hour) {
-    base = (seconds / minute).round();
-    ref = [base, "${base} minute"];
+    displayNum = (seconds / minute).round();
+    displayStr = "${displayNum} minute";
   } else if (seconds < day) {
-    base = (seconds / hour).round();
-    ref = [base, "${base} hour"];
+    displayNum = (seconds / hour).round();
+    displayStr = "${displayNum} hour";
   } else if (seconds < month) {
-    base = (seconds / day).round();
-    ref = [base, "${base} day"];
+    displayNum = (seconds / day).round();
+    displayStr = "${displayNum} day";
   } else if (seconds < year) {
-    base = (seconds / month).round();
-    ref = [base, "${base} month"];
+    displayNum = (seconds / month).round();
+    displayStr = "${displayNum} month";
   } else if (seconds < century) {
-    base = (seconds / year).round();
-    ref = [base, "${base} year"];
+    displayNum = (seconds / year).round();
+    displayStr = "${displayNum} year";
   } else {
-    ref = [null, 'centuries'];
+    displayStr = 'centuries';
   }
-  display_num = ref[0];
-  display_str = ref[1];
-  if ((display_num != null) && display_num != 1) {
-    display_str += 's';
+  if ((displayNum != null) && displayNum != 1) {
+    displayStr += 's';
   }
-  return display_str;
+  return displayStr;
 }
 
 class Match extends xcvbnm.Match {

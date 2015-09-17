@@ -108,9 +108,9 @@ main() {
   });
 
   test('displayTime', () {
-    var display, l, len, msg, ref, ref1, seconds;
-    ref = [
+    for (List row in [
       [0, '0 seconds'],
+      [1, '1 second'],
       [1, '1 second'],
       [32, '32 seconds'],
       [60, '1 minute'],
@@ -120,14 +120,10 @@ main() {
       [1 * 3600 * 24 * 31 + 4000, '1 month'],
       [99 * 3600 * 24 * 31 * 12, '99 years'],
       [math.pow(10, 10), 'centuries']
-    ];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      seconds = ref1[0];
-      display = ref1[1];
-      msg = "${seconds} seconds has a display time of ${display}";
-      expect(displayTime(seconds), display, reason: msg);
+    ]) {
+      num seconds = row[0];
+      String display = row[1];
+      expect(displayTime(seconds), display, reason: "${seconds} seconds has a display time of ${display}");
     }
   });
 
