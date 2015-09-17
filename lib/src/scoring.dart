@@ -468,8 +468,10 @@ class DictionaryMatch extends Match {
       : super(pattern: 'dictionary', token: token);
 
   // dictionary
+  bool reversed;
   int rank;
   num uppercaseEntropy;
+  num reversedEntropy;
   bool l33t;
   num l33tEntropy;
   Map<String, String> sub;
@@ -486,8 +488,9 @@ class DictionaryMatch extends Match {
 num dictionaryEntropy(DictionaryMatch match) {
   match.baseEntropy = lg(match.rank); // keep these as properties for display purposes
   match.uppercaseEntropy = extraUppercaseEntropy(match);
+  match.reversedEntropy = match.reversed == true ? 1 : 0;
   match.l33tEntropy = extraL33tEntropy(match);
-  return match.baseEntropy + match.uppercaseEntropy + match.l33tEntropy;
+  return match.baseEntropy + match.uppercaseEntropy + match.l33tEntropy + match.reversedEntropy;
 }
 
 var _startUpperRegExp = new RegExp(r"^[A-Z][^A-Z]+$");
@@ -496,50 +499,46 @@ var _allUpperRegExp = new RegExp(r"^[^a-z]+$");
 var _allLowerRegExp = new RegExp(r"^[^A-Z]+$");
 
 num extraUppercaseEntropy(Match match) {
-  var L, U, chr, i, l, len, m, possibilities, ref, ref1, regex;
+  var i, m, possibilities, iMax;
+
   String word = match.token;
   if (_allLowerRegExp.hasMatch(word)) {
     return 0;
   }
-  ref = [_startUpperRegExp, _endUpperRegExp, _allUpperRegExp];
-  len = ref.length;
-  for (l = 0; l < len; l++) {
-    regex = ref[l];
+  // a capitalized word is the most common capitalization scheme,
+  // so it only doubles the search space (uncapitalized + capitalized): 1 extra bit of entropy.
+  //  allcaps and end-capitalized are common enough too, underestimate as 1 extra bit to be safe.
+  for (RegExp regex in [_startUpperRegExp, _endUpperRegExp, _allUpperRegExp]) {
     if (regex.hasMatch(word)) {
       return 1;
     }
   }
-  U = ((() {
-    var len1, m, ref1, results;
-    ref1 = word.split('');
-    results = [];
-    len1 = ref1.length;
-    for (m = 0; m < len1; m++) {
-      chr = ref1[m];
-      if (new RegExp(r"[A-Z]").hasMatch(chr)) {
-        results.add(chr);
-      }
+
+  // otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters
+  // with U uppercase letters or less. or, if there's more uppercase than lower (for eg. PASSwORD),
+  // the number of ways to lowercase U+L letters with L lowercase letters or less.
+  int u = 0;
+  int l = 0;
+  RegExp azUpper = new RegExp(r"[A-Z]");
+  RegExp azLower = new RegExp(r"[a-z]");
+  for (int i = 0; i < word.length; i++) {
+    String chr = word[i];
+    if (azUpper.hasMatch(chr)) {
+      u++;
     }
-    return results;
-  })()).length;
-  L = ((() {
-    var len1, m, ref1, results;
-    ref1 = word.split('');
-    results = [];
-    len1 = ref1.length;
-    for (m = 0; m < len1; m++) {
-      chr = ref1[m];
-      if (new RegExp(r"[a-z]").hasMatch(chr)) {
-        results.add(chr);
-      }
+    if (azLower.hasMatch(chr)) {
+      l++;
     }
-    return results;
-  })()).length;
+  }
+
   possibilities = 0;
   i = 1;
-  ref1 = math.min(U, L);
-  for (m = 1; 1 <= ref1 ? m <= ref1 : m >= ref1; i = 1 <= ref1 ? ++m : --m) {
-    possibilities += nCk(U + L, i);
+  iMax = math.min(u, l);
+  // Dart port should be...
+  // for (i = 1; i <= math.min(U, L); i) {
+  // but somehow we need to handle when uMax is 0...Bad algo conversion?
+  for (m = 1; 1 <= iMax ? m <= iMax : m >= iMax; i = 1 <= iMax ? ++m : --m) {
+    possibilities += nCk(u + l, i);
   }
   return lg(possibilities);
 }
