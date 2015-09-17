@@ -319,19 +319,6 @@ num calcEntropy(Match match) {
   return match.entropy = entropy_functions[match.pattern](match);
 }
 
-num dateEntropy(DateMatch match) {
-  var entropy, year_space;
-  year_space = math.max((match.year - referenceYear).abs(), minYearSpace);
-  entropy = lg(year_space * 31 * 12);
-  if (match.hasFullYear == true) {
-    entropy += 1;
-  }
-  if (match.separator != null && match.separator.length > 0) {
-    entropy += 2;
-  }
-  return entropy;
-}
-
 num repeatEntropy(RepeatMatch match) {
   num numRepeats = match.token.length / match.baseToken.length;
   return match.baseEntropy + lg(numRepeats);
@@ -359,8 +346,8 @@ num sequenceEntropy(SequenceMatch match) {
 }
 
 num regexEntropy(RegexMatch match) {
-  var year_space;
-  Map char_class_bases = {
+  var yearSpace;
+  Map charClassBases = {
     "alpha_lower": 26,
     "alpha_upper": 26,
     "alpha": 52,
@@ -368,17 +355,35 @@ num regexEntropy(RegexMatch match) {
     "digits": 10,
     "symbols": 33
   };
-  if (char_class_bases.containsKey(match.regexName)) {
-    return lg(math.pow(char_class_bases[match.regexName], match.token.length));
+  if (charClassBases.containsKey(match.regexName)) {
+    return lg(math.pow(charClassBases[match.regexName], match.token.length));
   } else {
     switch (match.regexName) {
       case 'recent_year':
-        year_space = (int.parse(match.regexMatch[0]) - referenceYear).abs();
-        year_space = math.max(year_space, minYearSpace);
-        return lg(year_space);
+        // conservative estimate of year space: num years from REFERENCE_YEAR.
+        // if year is close to REFERENCE_YEAR, estimate a year space of MIN_YEAR_SPACE.
+        yearSpace = (int.parse(match.regexMatch[0]) - referenceYear).abs();
+        yearSpace = math.max(yearSpace, minYearSpace);
+        return lg(yearSpace);
     }
   }
   return null;
+}
+
+num dateEntropy(DateMatch match) {
+  var entropy, yearSpace;
+  // base entropy: lg of (year distance from REFERENCE_YEAR * num_days * num_years)
+  yearSpace = math.max((match.year - referenceYear).abs(), minYearSpace);
+  entropy = lg(yearSpace * 31 * 12);
+  // add one bit for four-digit years
+  if (match.hasFullYear == true) {
+    entropy += 1;
+  }
+  // add two bits for separator selection (one of ~4 choices)
+  if (match.separator != null && match.separator.length > 0) {
+    entropy += 2;
+  }
+  return entropy;
 }
 
 _calcAverageDegree(Map graph) {

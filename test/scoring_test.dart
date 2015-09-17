@@ -271,7 +271,8 @@ main() {
       ['4567', true, lg(10) + lg(4)],
       ['7654', false, lg(10) + lg(4) + 1],
       ['ZYX', false, 2 + lg(3) + 1]
-    ]) {String token = row[0];
+    ]) {
+      String token = row[0];
       bool ascending = row[1];
       num entropy = row[2];
       SequenceMatch match = new SequenceMatch(token: token, ascending: ascending);
@@ -281,17 +282,17 @@ main() {
 
   test('regexEntropy', () {
     var match;
+
     match = new RegexMatch(token: 'aizocdk', regexName: 'alpha_lower', regexMatch: ['aizocdk']);
-
     expect(regexEntropy(match), lg(math.pow(26, 7)));
+
     match = new RegexMatch(token: 'ag7C8', regexName: 'alphanumeric', regexMatch: ['ag7C8']);
-
     expect(regexEntropy(match), lg(math.pow(2 * 26 + 10, 5)));
+
     match = new RegexMatch(token: '1972', regexName: 'recent_year', regexMatch: ['1972']);
-
     expect(regexEntropy(match), lg(referenceYear - 1972));
-    match = new RegexMatch(token: '1992', regexName: 'recent_year', regexMatch: ['1992']);
 
+    match = new RegexMatch(token: '1992', regexName: 'recent_year', regexMatch: ['1992']);
     expect(regexEntropy(match), lg(minYearSpace));
   });
 
@@ -300,9 +301,9 @@ main() {
     match = new DateMatch(token: '1123', separator: '', hasFullYear: false, year: 1923, month: 1, day: 1);
     msg = "entropy for ${match.token} is lg days * months * distance_from_ref_year";
     expect(dateEntropy(match), lg(12 * 31 * (referenceYear - match.year)), reason: msg);
+
     match = new DateMatch(token: '1/1/2010', separator: '/', hasFullYear: true, year: 2010, month: 1, day: 1);
-    msg = "recent years assume MIN_YEAR_SPACE.";
-    msg += " extra entropy is added for separators and a 4-digit year.";
+    msg = "recent years assume MIN_YEAR_SPACE. extra entropy is added for separators and a 4-digit year.";
     expect(dateEntropy(match), lg(12 * 31 * minYearSpace) + 2 + 1, reason: msg);
   });
 
