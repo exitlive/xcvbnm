@@ -250,6 +250,18 @@ class RegexMatch extends Match {
 
   RegexMatch({this.regexName, this.regexMatch, int i, int j, String token})
       : super(pattern: 'regex', i: i, j: j, token: token);
+
+  @override
+  toMap() {
+    Map map = super.toMap();
+    if (regexName != null) {
+      map["regexName"] = regexName;
+    }
+    if (regexMatch != null) {
+      map["regexMatch"] = regexMatch;
+    }
+    return map;
+  }
 }
 
 class DateMatch extends Match {

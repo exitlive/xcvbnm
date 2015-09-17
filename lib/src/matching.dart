@@ -81,13 +81,23 @@ Map<String, List<String>> l33tTable = {
 };
 
 Map<String, RegExp> regexen = {
-  'alpha_lower': new RegExp("[A-Z]{2,}"),
-  'alpha_upper': new RegExp("[a-z]{2,}"),
-  'alpha': new RegExp("[a-zA-Z]{2,}"),
-  'alphanumeric': new RegExp("[a-zA-Z0-9]{2,}"),
-  'digits': new RegExp("\d{2,}"),
-  'symbols': new RegExp("[\W_]{2,}"), // includes non-latin unicode chars
-  'recent_year': new RegExp("19\d\d|200\d|201\d")
+  'alpha_lower': new RegExp(r"[a-z]{2,}"),
+  'alpha_upper': new RegExp(r"[A-Z]{2,}"),
+  'alpha': new RegExp(r"[a-zA-Z]{2,}"),
+  'alphanumeric': new RegExp(r"[a-zA-Z0-9]{2,}"),
+  'digits': new RegExp(r"\d{2,}"),
+  'symbols': new RegExp(r"[\W_]{2,}"), // includes non-latin unicode chars
+  'recent_year': new RegExp(r"19\d\d|200\d|201\d")
+};
+
+Map<String, int> regexPrecedence = {
+  "alphanumeric": 0,
+  "alpha": 1,
+  "alpha_lower": 2,
+  "alpha_upper": 2,
+  "digits": 2,
+  "symbols": 2,
+  "recent_year": 3
 };
 
 int dateMaxYear = 2050;
@@ -131,7 +141,7 @@ List<scoring.Match> omnimatch(String password) {
     spatialMatch,
     repeatMatch,
     sequenceMatch,
-    // regexMatch, // TODO to implement, this hangs for now
+    regexMatch,
     dateMatch
   ];
 
@@ -593,13 +603,12 @@ List<scoring.RegexMatch> regexMatch(password, [Map<String, RegExp> _regexen]) {
   List<scoring.RegexMatch> matches = [];
   _regexen.forEach((String name, RegExp regex) {
     // regex.lastIndex = 0 # keeps regex_match stateless
-    while (true) {
-      core.Match rxMatch = regex.firstMatch(password);
-      if (rxMatch == null) {
-        break;
-      }
-      String token = rxMatch[0];
+    // Here the dart port is slightly different as we don't have the ability to "continue" a regexp
+    // Instead use a allMatches
+    Iterable<core.Match> rxAllMatches = regex.allMatches(password);
 
+    for (core.Match rxMatch in rxAllMatches) {
+      String token = rxMatch[0];
       // Convert match to list of string
       List<String> regexMatches = [];
       for (int i = 0; i <= rxMatch.groupCount; i++) {
@@ -610,7 +619,28 @@ List<scoring.RegexMatch> regexMatch(password, [Map<String, RegExp> _regexen]) {
           token: token, i: rxMatch.start, j: rxMatch.end - 1, regexName: name, regexMatch: regexMatches));
     }
   });
-  return sorted(matches);
+
+  // currently, match list includes a bunch of redundancies:
+  // ex for every alpha_lower match, also an alpha and alphanumeric match of the same [i,j].
+  // ex for every recent_year match, also an alphanumeric match and digits match.
+  //# use precedence to filter these redundancies out.
+  Map<String, Object> precedence_map = {}; // maps from 'i-j' to current highest precedence
+  String getKey(scoring.Match match) => "${match.i}-${match.j}";
+  int higestPrecedence;
+  for (scoring.RegexMatch match in matches) {
+    String key = getKey(match);
+    int precedence = regexPrecedence[match.regexName];
+    if (precedence_map.containsKey(key)) {
+      higestPrecedence = precedence_map[key];
+      if (higestPrecedence > precedence) {
+        continue;
+      }
+    }
+    precedence_map[key] = precedence;
+  }
+  return sorted(new List.from(matches.where((scoring.RegexMatch match) {
+    return (precedence_map[getKey(match)] == regexPrecedence[match.regexName]);
+  })));
 }
 
 /**

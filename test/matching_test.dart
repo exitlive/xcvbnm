@@ -4,6 +4,8 @@ import 'package:test/test.dart';
 import 'package:xcvbnm/src/matching.dart';
 import 'package:xcvbnm/src/adjacency_graphs.dart';
 import "package:xcvbnm/src/scoring.dart" as scoring;
+import "dart:core" hide Match;
+import "dart:core" as core;
 
 main() {
   test('matching utils', () {
@@ -181,6 +183,9 @@ main() {
       // Check matching
       scoring.Match expectedMatch = expectedMatches[k];
 
+      if (expectedMatch.pattern != null) {
+        expect(expectedMatch.pattern, match.pattern, reason: msg);
+      }
       if (expectedMatch.i != null) {
         expect(expectedMatch.i, match.i, reason: msg);
       }
@@ -189,6 +194,9 @@ main() {
       }
       if (expectedMatch.token != null) {
         expect(expectedMatch.token, match.token, reason: msg);
+      }
+      if (expectedMatch.entropy != null) {
+        expect(expectedMatch.entropy, match.entropy, reason: msg);
       }
 
       if (expectedMatch is scoring.DictionaryMatch) {
@@ -255,6 +263,15 @@ main() {
         }
         if (expectedMatch.baseEntropy != null) {
           expect(expectedMatch.baseEntropy, foundMatch.baseEntropy, reason: msg);
+        }
+      } else if (expectedMatch is scoring.RegexMatch) {
+        scoring.RegexMatch foundMatch = match as scoring.RegexMatch;
+
+        if (expectedMatch.regexName != null) {
+          expect(foundMatch.regexName, expectedMatch.regexName, reason: msg);
+        }
+        if (expectedMatch.regexMatch != null) {
+          expect(foundMatch.regexMatch, expectedMatch.regexMatch, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -937,6 +954,46 @@ main() {
     ], [
       nrm('ab')
     ]);
+  });
+
+  test('regex matching', () {
+    List<scoring.Match> matches;
+
+    scoring.RegexMatch rm(String regexName) => new scoring.RegexMatch(regexName: regexName);
+
+    String msg;
+    String password;
+    for (List row in [
+      ['aaa', 'alpha_lower'],
+      ['a7c8D9', 'alphanumeric'],
+      ['aAaA', 'alpha'],
+      ['1922', 'recent_year'],
+      ['&@*#', 'symbols'],
+      ['94113', 'digits']
+    ]) {
+      String pattern = row[0];
+      String name = row[1];
+      matches = regexMatch(pattern);
+      msg = "matches ${pattern} as a ${name} pattern";
+      checkMatches(msg, matches, 'regex', [
+        pattern
+      ], [
+        [0, pattern.length - 1]
+      ], [
+        rm(name)
+      ]);
+    }
+
+    password = 'a7c8D9vvv2015';
+    matches = regexMatch(password);
+    List ijs = [
+      [0, 12],
+      [6, 8],
+      [9, 12]
+    ];
+    msg = "matches multiple overlapping regex patterns";
+    checkMatches(msg, matches, 'regex', ['a7c8D9vvv2015', 'vvv', '2015'], ijs,
+        [rm('alphanumeric'), rm('alpha_lower'), rm('recent_year')]);
   });
 
   test('date matching', () {
