@@ -3,6 +3,7 @@ library xcvbnm.scoring_test;
 import 'package:test/test.dart';
 import 'dart:math' as math;
 import 'package:xcvbnm/src/scoring.dart';
+import 'package:xcvbnm/src/matching.dart' as matching;
 import 'package:xcvbnm/src/xcvbnm_common.dart' as xcvbnm;
 import 'dart:core' hide Match;
 
@@ -244,20 +245,22 @@ main() {
   });
 
   test('repeatEntropy', () {
-    var entropy, l, len, match, msg, ref, ref1, token;
-    ref = [
-      ['aa', lg(26 * 2)],
-      ['999', lg(10 * 3)],
-      ['\$\$\$\$', lg(33 * 4)]
-    ];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      token = ref1[0];
-      entropy = ref1[1];
-      match = new Match()..token = token;
-      msg = "the repeat pattern '${token}' has entropy of ${entropy}";
-      expect(repeatEntropy(match), entropy, reason: msg);
+    for (List row in [
+      ['aa', 'a'],
+      ['999', '9'],
+      [r'$$$$', r'$'],
+      ['abab', 'ab'],
+      ['batterystaplebatterystaplebatterystaple', 'batterystaple']
+    ]) {
+      String token = row[0];
+      String baseToken = row[1];
+
+      num baseEntropy = minimumEntropyMatchSequence(baseToken, matching.omnimatch(baseToken)).entropy;
+
+      RepeatMatch match = new RepeatMatch(token: token, baseToken: baseToken, baseEntropy: baseEntropy);
+      num expectedEntropy = baseEntropy + lg(match.token.length / match.baseToken.length);
+      expect(repeatEntropy(match), expectedEntropy,
+          reason: "the repeat pattern '${token}' has entropy of ${expectedEntropy}");
     }
   });
 

@@ -238,10 +238,13 @@ class SequenceMatch extends Match {
 }
 
 class RepeatMatch extends Match {
-  // regex
-  String repeatedChar;
+  // repeat
+  String baseToken;
+  num baseEntropy;
+  List<Match> baseMatches;
 
-  RepeatMatch({this.repeatedChar, int i, int j, String token}) : super(pattern: 'repeat', i: i, j: j, token: token);
+  RepeatMatch({this.baseEntropy, this.baseToken, this.baseMatches, int i, int j, String token})
+      : super(pattern: 'repeat', i: i, j: j, token: token);
 }
 
 class SpatialMatch extends Match {
@@ -295,6 +298,10 @@ class DateMatch extends Match {
   }
 }
 
+/*
+ * entropy calcs -- one function per match pattern
+ */
+
 typedef num _EntropyFunction(Match match);
 
 num calcEntropy(Match match) {
@@ -325,10 +332,9 @@ num dateEntropy(DateMatch match) {
   return entropy;
 }
 
-num repeatEntropy(Match match) {
-  var cardinality;
-  cardinality = calcBruteforceCardinality(match.token);
-  return lg(cardinality * match.token.length);
+num repeatEntropy(RepeatMatch match) {
+  num numRepeats = match.token.length / match.baseToken.length;
+  return match.baseEntropy + lg(numRepeats);
 }
 
 num sequenceEntropy(SequenceMatch match) {

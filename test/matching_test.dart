@@ -277,8 +277,11 @@ main() {
       } else if (expectedMatch is scoring.RepeatMatch) {
         scoring.RepeatMatch foundMatch = match as scoring.RepeatMatch;
 
-        if (expectedMatch.repeatedChar != null) {
-          expect(expectedMatch.repeatedChar, foundMatch.repeatedChar, reason: msg);
+        if (expectedMatch.baseToken != null) {
+          expect(expectedMatch.baseToken, foundMatch.baseToken, reason: msg);
+        }
+        if (expectedMatch.baseEntropy != null) {
+          expect(expectedMatch.baseEntropy, foundMatch.baseEntropy, reason: msg);
         }
       } else {
         throw "not supported yet";
@@ -852,32 +855,33 @@ main() {
 
   test('repeat matching', () {
     List<scoring.RepeatMatch> matches;
+    String pattern;
     String msg;
 
-    for (String password in ['', '#', '##']) {
+    for (String password in ['', '#']) {
       expect(repeatMatch(password), [], reason: "doesn't match length-${password.length} repeat patterns");
     }
 
-    nrm(String repeatedChar) => new scoring.RepeatMatch(repeatedChar: repeatedChar);
+    nrm(String baseToken) => new scoring.RepeatMatch(baseToken: baseToken);
 
+    // test single-character repeats
     List prefixes = ['@', 'y4@'];
     List suffixes = ['u', 'u%7'];
-    String pattern = '&&&&&';
-    genPws(pattern, prefixes, suffixes).forEach((List row) {
+    pattern = '&&&&&';
+    for (List row in genPws(pattern, prefixes, suffixes)) {
       String password = row[0];
       int i = row[1];
       int j = row[2];
 
       matches = repeatMatch(password);
-      msg = "matches embedded repeat patterns";
-      checkMatches(msg, matches, 'repeat', [
+      checkMatches("matches embedded repeat patterns", matches, 'repeat', [
         pattern
       ], [
         [i, j]
       ], [
         nrm('&')
       ]);
-    });
+    }
 
     for (int length in [3, 12]) {
       for (String chr in ['a', 'Z', '4', '&']) {
@@ -925,6 +929,40 @@ main() {
       nrm('1'),
       nrm('a'),
       nrm('@')
+    ]);
+
+    // test multi-character repeats
+    pattern = 'abab';
+    matches = repeatMatch(pattern);
+    msg = 'matches multi-character repeat pattern';
+    checkMatches(msg, matches, 'repeat', [
+      pattern
+    ], [
+      [0, pattern.length - 1]
+    ], [
+      nrm('ab')
+    ]);
+
+    pattern = 'aabaab';
+    matches = repeatMatch(pattern);
+    msg = 'matches aabaab as a repeat instead of the aa prefix';
+    checkMatches(msg, matches, 'repeat', [
+      pattern
+    ], [
+      [0, pattern.length - 1]
+    ], [
+      nrm('aab')
+    ]);
+
+    pattern = 'abababab';
+    matches = repeatMatch(pattern);
+    msg = 'identifies ab as repeat string, even though abab is also repeated';
+    checkMatches(msg, matches, 'repeat', [
+      pattern
+    ], [
+      [0, pattern.length - 1]
+    ], [
+      nrm('ab')
     ]);
   });
 

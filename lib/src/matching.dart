@@ -3,8 +3,9 @@ library xcvbnm.matching;
 import "scoring.dart" as scoring;
 import 'frequency_lists.dart';
 import 'adjacency_graphs.dart';
+import "xcvbnm_common.dart" as xcvbnm;
 import 'dart:core' as core;
-import 'dart:core';
+import 'dart:core' hide Match;
 
 bool empty(var obj) {
   return obj.isEmpty;
@@ -495,13 +496,58 @@ List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<
 }
 
 /**
- * repeats (aaa) and sequences (abcdef)
+ * repeats (aaa, abcabcabc) and sequences (abcdef)
  */
 List<scoring.RepeatMatch> repeatMatch(String password) {
-  int minRepeatLength = 3; // TODO allow 2-char repeats?
   List<scoring.RepeatMatch> matches = [];
-  int i = 0;
-  while (i < password.length) {
+  RegExp greedy = new RegExp(r"(.+)\1+");
+  RegExp lazy = new RegExp(r"(.+?)\1+");
+  RegExp lazyAnchored = new RegExp(r"^(.+?)\1+$");
+  int lastIndex = 0;
+  core.Match match;
+  String baseToken;
+
+  while (lastIndex < password.length) {
+    // We test password after lastIndex
+    String pattern = password.substring(lastIndex);
+
+    core.Match greedyMatch = greedy.firstMatch(pattern);
+    core.Match lazyMatch = lazy.firstMatch(pattern);
+    if (greedyMatch == null) {
+      break;
+    }
+
+    if (greedyMatch.end - greedyMatch.start > lazyMatch.end + lazyMatch.start) {
+      // greedy beats lazy for 'aabaab'
+      //  greedy: [aabaab, aab]
+      // lazy:   [aa,     a]
+      match = greedyMatch;
+      //  greedy's repeated string might itself be repeated, eg.
+      // aabaab in aabaabaabaab.
+      // run an anchored lazy match on greedy's repeated string
+      // to find the shortest repeated string
+      baseToken = lazyAnchored.firstMatch(match.group(0)).group(1);
+    } else {
+      // lazy beats greedy for 'aaaaa'
+      //   greedy: [aaaa,  aa]
+      //   lazy:   [aaaaa, a]
+      match = lazyMatch;
+      baseToken = match.group(1);
+    }
+
+    int i = lastIndex + match.start;
+    int j = lastIndex + match.start + match.group(0).length - 1;
+
+    // recursively match and score the base string
+    xcvbnm.Result baseAnalysis = scoring.minimumEntropyMatchSequence(baseToken, omnimatch(baseToken));
+    List<scoring.Match> baseMatches = baseAnalysis.matchSequence;
+    num baseEntropy = baseAnalysis.entropy;
+    matches.add(new scoring.RepeatMatch(
+        i: i, j: j, token: match[0], baseToken: baseToken, baseEntropy: baseEntropy, baseMatches: baseMatches));
+    lastIndex = j + 1;
+  }
+
+  /*
     int j = i + 1;
     while (true) {
       String prevChar = password[j - 1];
@@ -515,14 +561,16 @@ List<scoring.RepeatMatch> repeatMatch(String password) {
         j -= 1;
         if (j - i + 1 >= minRepeatLength) {
           matches
-              .add(new scoring.RepeatMatch(i: i, j: j, token: password.substring(i, j + 1), repeatedChar: password[i]));
+              .add(new scoring.RepeatMatch(i: i, j: j, token: password.substring(i, j + 1), baseToken: password[i]));
         }
         break;
       }
     }
     i = j + 1;
   }
-  return sorted(matches);
+  */
+  // return sorted(matches);
+  return matches;
 }
 
 List<scoring.Match> sequenceMatch(String password) {
