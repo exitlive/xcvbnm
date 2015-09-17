@@ -129,14 +129,15 @@ main() {
   });
 
   test('minimumEntropySearch', () {
-    var cardinality, expected, m0, m1, m2, matches, password, ref, ref1, ref2, ref3, ref4;
+    int cardinality;
+    num expected;
+    String password;
     Function msg;
+    Match m0, m1, m2;
+    List<Match> matches;
 
     Match m(i, j, entropy) {
-      return new Match()
-        ..i = i
-        ..j = j
-        ..entropy = entropy;
+      return new Match(i: i, j: j, entropy: entropy);
     }
     password = '0123456789';
     cardinality = 10;
@@ -146,22 +147,20 @@ main() {
     };
     xcvbnm.Result result = minimumEntropyMatchSequence(password, []);
     expect(result.matchSequence.length, 1, reason: msg("result.length == 1"));
-
     m0 = result.matchSequence[0];
     expect(m0.pattern, 'bruteforce', reason: msg("match.pattern == 'bruteforce'"));
     expect(m0.token, password, reason: msg("match.token == " + password));
-    expect(m0.cardinality, cardinality, reason: msg("match.cardinality == ${cardinality}"));
+    expect((m0 as BruteforceMatch).cardinality, cardinality, reason: msg("match.cardinality == ${cardinality}"));
     expected = (lg(math.pow(cardinality, password.length))).round();
     expect((result.entropy).round(), expected, reason: msg("total entropy == ${expected}"));
     expect((m0.entropy).round(), expected, reason: msg("match entropy == ${expected}"));
     expect([m0.i, m0.j], [0, 9], reason: msg("[i, j] == [${m0.i}, ${m0.j}]"));
+
     msg = (s) {
       return "returns match + bruteforce when match covers a prefix of password: " + s;
     };
-
-    ref = [m(0, 5, 1)];
-    m0 = ref[0];
-    matches = ref;
+    matches = [m(0, 5, 1)];
+    m0 = matches[0];
     result = minimumEntropyMatchSequence(password, matches);
     expect(result.matchSequence.length, 2, reason: msg("result.match.sequence.length == 2"));
     expect(result.matchSequence[0], m0, reason: msg("first match is the provided match object"));
@@ -172,9 +171,8 @@ main() {
       return "returns bruteforce + match when match covers a suffix: " + s;
     };
 
-    ref1 = [m(3, 9, 1)];
-    m1 = ref1[0];
-    matches = ref1;
+    matches = [m(3, 9, 1)];
+    m1 = matches[0];
     result = minimumEntropyMatchSequence(password, matches);
     expect(result.matchSequence.length, 2, reason: msg("result.match.sequence.length == 2"));
     m0 = result.matchSequence[0];
@@ -185,9 +183,8 @@ main() {
     msg = (s) {
       return "returns bruteforce + match + bruteforce when match covers an infix: " + s;
     };
-    ref2 = [m(1, 8, 1)];
-    m1 = ref2[0];
-    matches = ref2;
+    matches = [m(1, 8, 1)];
+    m1 = matches[0];
     result = minimumEntropyMatchSequence(password, matches);
     expect(result.matchSequence.length, 3, reason: msg("result.length == 3"));
     expect(result.matchSequence[1], m1, reason: msg("middle match is the provided match object"));
@@ -201,10 +198,9 @@ main() {
     msg = (s) {
       return "chooses lower-entropy match given two matches of the same span: " + s;
     };
-    ref3 = [m(0, 9, 1), m(0, 9, 2)];
-    m0 = ref3[0];
-    m1 = ref3[1];
-    matches = ref3;
+    matches = [m(0, 9, 1), m(0, 9, 2)];
+    m0 = matches[0];
+    m1 = matches[1];
     result = minimumEntropyMatchSequence(password, matches);
     expect(result.matchSequence.length, 1, reason: msg("result.length == 1"));
     expect(result.matchSequence[0], m0, reason: msg("result.match_sequence[0] == m0"));
@@ -217,11 +213,10 @@ main() {
     msg = (s) {
       return "when m0 covers m1 and m2, choose [m0] when m0 < m1 + m2: " + s;
     };
-    ref4 = [m(0, 9, 1), m(0, 3, 1), m(4, 9, 1)];
-    m0 = ref4[0];
-    m1 = ref4[1];
-    m2 = ref4[2];
-    matches = ref4;
+    matches = [m(0, 9, 1), m(0, 3, 1), m(4, 9, 1)];
+    m0 = matches[0];
+    m1 = matches[1];
+    m2 = matches[2];
     result = minimumEntropyMatchSequence(password, matches);
     expect(result.entropy, 1, reason: msg("total entropy == 1"));
     expect(result.matchSequence, [m0], reason: msg("match_sequence is [m0]"));

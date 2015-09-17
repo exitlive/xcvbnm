@@ -182,7 +182,7 @@ class Match extends xcvbnm.Match {
 
   num entropy;
 
-  Match({this.baseEntropy, this.pattern, this.i, this.j, this.token});
+  Match({this.entropy, this.baseEntropy, this.pattern, this.i, this.j, this.token});
 
   // repeat/sequence/regex/spatial entropy
   String token;
@@ -193,7 +193,6 @@ class Match extends xcvbnm.Match {
   // match sequence
   int i;
   int j;
-  int cardinality;
 
   toMap() {
     Map map = {};
@@ -585,25 +584,24 @@ num extraL33tEntropy(DictionaryMatch match) {
   return extraEntropy;
 }
 
+class BruteforceMatch extends Match {
+  int cardinality;
+  BruteforceMatch({this.cardinality, int i, int j, String token, num entropy})
+      : super(pattern: "bruteforce", i: i, j: j, token: token, entropy: entropy);
+}
+
+/**
+ * minimum entropy search
+ *
+ * takes a list of overlapping matches, returns the non-overlapping sublist with
+ * minimum entropy. O(nm) dp alg for length-n password with m candidate matches.
+ */
 xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) {
-  var bruteforce_cardinality,
-      candidate_entropy,
-      crack_time,
-      i,
-      j,
-      k,
-      len,
-      len1,
-      m,
-      make_bruteforce_match,
-      match,
-      match_sequence_copy,
-      min_entropy,
-      o,
-      ref2,
-      up_to_k;
-  List<Match> match_sequence;
-  bruteforce_cardinality = calcBruteforceCardinality(password);
+  num candidateEntropy, crackTime, minEntropy;
+  int i, j, k;
+  List upToK;
+  Match match;
+  List<Match> matchSequence, matchSequenceCopy;
 
   _safeArrayValue(List array, int index) {
     if ((index < 0) || (index >= array.length)) {
@@ -616,79 +614,87 @@ xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) 
     return value;
   }
 
+  int bruteforceCardinality = calcBruteforceCardinality(password); // e.g. 26 for lowercase
   int passwordLength = password.length;
-  up_to_k = new List(passwordLength);
-  List<Match> backpointers = new List(passwordLength);
-
-  for (k = 0; k < passwordLength; k++) {
-    up_to_k[k] = _safeArrayValue(up_to_k, k - 1) + lg(bruteforce_cardinality);
+  upToK = new List(passwordLength + 1); //  minimum entropy up to k.
+  // for the optimal seq of matches up to k, backpointers holds the final match (match.j == k).
+  // null means the sequence ends w/ a brute-force character.
+  List<Match> backpointers = new List(passwordLength + 1);
+  for (k = 0; k <= passwordLength; k++) {
+    // starting scenario to try and beat:
+    // adding a brute-force character to the minimum entropy sequence at k-1.
+    upToK[k] = _safeArrayValue(upToK, k - 1) + lg(bruteforceCardinality);
     backpointers[k] = null;
-    len = matches.length;
-    for (m = 0; m < len; m++) {
-      match = matches[m];
+
+    for (Match match in matches) {
       if (!(match.j == k)) {
         continue;
       }
       i = match.i;
       j = match.j;
 
-      candidate_entropy = _safeArrayValue(up_to_k, i - 1) + calcEntropy(match);
-      if (candidate_entropy < up_to_k[j]) {
-        up_to_k[j] = candidate_entropy;
+      // see if best entropy up to i-1 + entropy of this match is less than current minimum at j.
+      candidateEntropy = _safeArrayValue(upToK, i - 1) + calcEntropy(match);
+      if (candidateEntropy < upToK[j]) {
+        upToK[j] = candidateEntropy;
         backpointers[j] = match;
       }
     }
   }
-  match_sequence = [];
+
+  // walk backwards and decode the best sequence
+  matchSequence = [];
   k = passwordLength - 1;
   while (k >= 0) {
     match = backpointers[k];
     if (match != null) {
-      match_sequence.add(match);
+      matchSequence.add(match);
       k = match.i - 1;
     } else {
       k -= 1;
     }
   }
-  match_sequence = new List.from(match_sequence.reversed);
-  make_bruteforce_match = (() {
-    return (i, j) {
-      return new Match()
-        ..pattern = 'bruteforce'
-        ..i = i
-        ..j = j
-        ..token = password.substring(i, j + 1)
-        ..entropy = lg(math.pow(bruteforce_cardinality, j - i + 1))
-        ..cardinality = bruteforce_cardinality;
-    };
-  })();
+  matchSequence = new List.from(matchSequence.reversed);
+
+  // fill in the blanks between pattern matches with bruteforce "matches"
+  // that way the match sequence fully covers the password:
+  // match1.j == match2.i - 1 for every adjacent match1, match2.
+  makeBruteforceMatch(i, j) {
+    return new BruteforceMatch(
+        i: i,
+        j: j,
+        token: password.substring(i, j + 1),
+        entropy: lg(math.pow(bruteforceCardinality, j - i + 1)),
+        cardinality: bruteforceCardinality);
+  }
+
   k = 0;
-  match_sequence_copy = [];
-  len1 = match_sequence.length;
-  for (o = 0; o < len1; o++) {
-    match = match_sequence[o];
-    ref2 = [match.i, match.j];
-    i = ref2[0];
-    j = ref2[1];
+  matchSequenceCopy = [];
+  for (match in matchSequence) {
+    i = match.i;
+    j = match.j;
     if (i - k > 0) {
-      match_sequence_copy.add(make_bruteforce_match(k, i - 1));
+      matchSequenceCopy.add(makeBruteforceMatch(k, i - 1));
     }
     k = j + 1;
-    match_sequence_copy.add(match);
+    matchSequenceCopy.add(match);
   }
   if (k < password.length) {
-    match_sequence_copy.add(make_bruteforce_match(k, password.length - 1));
+    matchSequenceCopy.add(makeBruteforceMatch(k, password.length - 1));
   }
-  match_sequence = match_sequence_copy;
-  min_entropy = _safeArrayValue(up_to_k, password.length - 1);
-  crack_time = entropyToCrackTime(min_entropy);
+  matchSequence = matchSequenceCopy;
+
+  minEntropy = _safeArrayValue(upToK, password.length - 1);
+  crackTime = entropyToCrackTime(minEntropy);
+
+  // final result object
   return new xcvbnm.Result()
     ..password = password
-    ..entropy = round_to_x_digits(min_entropy, 3)
-    ..matchSequence = match_sequence
-    ..crackTime = round_to_x_digits(crack_time, 3)
-    ..crackTimeDisplay = displayTime(crack_time)
-    ..score = crackTimeToScore(crack_time);
+    ..entropy = round_to_x_digits(minEntropy, 3)
+    ..matchSequence = matchSequence
+    ..crackTime = round_to_x_digits(crackTime, 3)
+    ..crackTimeDisplay = displayTime(crackTime)
+    ..score = crackTimeToScore(crackTime);
 }
 
 int round_to_x_digits(n, x) {
