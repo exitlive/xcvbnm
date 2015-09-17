@@ -57,14 +57,21 @@ main(List<String> args) {
           print("'${match.token}'");
           print("pattern:      '${match.pattern}'");
           print("entropy:       ${match.entropy}");
-          if (match.rank != null) {
-            print("rank:          ${match.rank}");
+
+          if (match is scoring.DictionaryMatch) {
+            if (match.rank != null) {
+              print("rank:          ${match.rank}");
+            }
           }
+
           if (match.baseEntropy != null) {
             print("base_entropy:  ${match.baseEntropy}");
           }
-          if (match.uppercaseEntropy != null) {
-            print("upper_entropy: ${match.uppercaseEntropy}");
+
+          if (match is scoring.DictionaryMatch) {
+            if (match.uppercaseEntropy != null) {
+              print("upper_entropy: ${match.uppercaseEntropy}");
+            }
           }
         }
       }

@@ -42,7 +42,7 @@ main() {
       int i = 1;
       DivElement matchesEl = new DivElement()..classes.add('app-matches');
       resultEl.append(matchesEl);
-      for (scoring.Match match in result.matchSequence) {
+      for (var match in result.matchSequence) {
         if (maxMatchToDisplay != null && i > maxMatchToDisplay) {
           break;
         }
@@ -54,14 +54,18 @@ main() {
           lines.add("'${match.token}'");
           lines.add("pattern:       '${match.pattern}'");
           lines.add("entropy:       ${match.entropy}");
-          if (match.rank != null) {
-            lines.add("rank:          ${match.rank}");
-          }
+
           if (match.baseEntropy != null) {
             lines.add("base_entropy:  ${match.baseEntropy}");
           }
-          if (match.uppercaseEntropy != null) {
-            lines.add("upper_entropy: ${match.uppercaseEntropy}");
+
+          if (match is scoring.DictionaryMatch) {
+            if (match.rank != null) {
+              lines.add("rank:          ${match.rank}");
+            }
+            if (match.uppercaseEntropy != null) {
+              lines.add("upper_entropy: ${match.uppercaseEntropy}");
+            }
           }
         }
         for (String line in lines) {

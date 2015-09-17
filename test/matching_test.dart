@@ -218,8 +218,8 @@ main() {
         expect(expectedMatch.token, match.token, reason: msg);
       }
 
-      if (expectedMatch is DictionaryMatch) {
-        DictionaryMatch foundMatch = match as DictionaryMatch;
+      if (expectedMatch is scoring.DictionaryMatch) {
+        scoring.DictionaryMatch foundMatch = match as scoring.DictionaryMatch;
         if (expectedMatch.matchedWord != null) {
           expect(expectedMatch.matchedWord, foundMatch.matchedWord, reason: msg);
         }
@@ -331,7 +331,7 @@ main() {
     msg = "matches words that contain other words";
 
     ndm(String matchedWord, int rank, String dictionaryName) =>
-        new DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
+        new scoring.DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
 
     checkMatches(msg, matches, 'dictionary', patterns, [
       [0, 5],
@@ -618,7 +618,7 @@ main() {
       ], [
         ij
       ], [
-        new DictionaryMatch()
+        new scoring.DictionaryMatch()
           ..l33t = true
           ..sub = sub
           ..matchedWord = word
@@ -627,8 +627,8 @@ main() {
       ]);
     });
 
-    ndm(bool l33t, Map sub, String matchedWord, int rank, String dictionaryName) =>
-        new DictionaryMatch(l33t: l33t, sub: sub, matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
+    ndm(bool l33t, Map sub, String matchedWord, int rank, String dictionaryName) => new scoring.DictionaryMatch(
+        l33t: l33t, sub: sub, matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
     checkMatches("matches against overlapping l33t patterns", lm('@a(go{G0'), 'dictionary', [
       '@a(',
       '(go',

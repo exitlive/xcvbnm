@@ -139,18 +139,7 @@ List<scoring.Match> omnimatch(String password) {
   return sorted(matches);
 }
 
-class DictionaryMatch extends scoring.Match {
-  DictionaryMatch({this.matchedWord, this.dictionaryName, int rank, Map<String, String> sub, bool l33t}) {
-    this.rank = rank;
-    this.sub = sub;
-    this.l33t = l33t;
-  }
-
-  String matchedWord;
-  String dictionaryName;
-}
-
-List<DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_]) {
+List<scoring.DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_]) {
   // _ranked_dictionaries variable is for unit testing purposes
   var len, matches, rank, word;
   if (rankedDictionaries_ == null) {
@@ -166,8 +155,7 @@ List<DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_]) {
 
         if (ranked_dict.containsKey(word)) {
           rank = ranked_dict[word];
-          matches.add(new DictionaryMatch()
-            ..pattern = 'dictionary'
+          matches.add(new scoring.DictionaryMatch()
             ..i = i
             ..j = j
             ..token = password.substring(i, j + 1)
@@ -364,9 +352,9 @@ List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
   return subDicts;
 }
 
-List<DictionaryMatch> l33tMatch(String password,
+List<scoring.DictionaryMatch> l33tMatch(String password,
     [Map<String, Map<String, int>> rankedDictionaries_, Map<String, List<String>> l33tTable_]) {
-  List<DictionaryMatch> matches = [];
+  List<scoring.DictionaryMatch> matches = [];
   if (rankedDictionaries_ == null) {
     rankedDictionaries_ = rankedDictionaries;
   }
@@ -380,7 +368,7 @@ List<DictionaryMatch> l33tMatch(String password,
       break;
     }
     String subbedPassword = translate(password, sub);
-    dictionaryMatch(subbedPassword, rankedDictionaries_).forEach((DictionaryMatch match) {
+    dictionaryMatch(subbedPassword, rankedDictionaries_).forEach((scoring.DictionaryMatch match) {
       String token = password.substring(match.i, match.j + 1);
       if (token.toLowerCase() != match.matchedWord) {
         Map matchSub = {};

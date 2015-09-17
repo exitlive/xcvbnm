@@ -182,25 +182,13 @@ class Match extends xcvbnm.Match {
 
   num entropy;
 
-  Match({this.pattern, this.i, this.j, this.token});
+  Match({this.baseEntropy, this.pattern, this.i, this.j, this.token});
 
   // repeat/sequence/regex/spatial entropy
   String token;
 
-  // dictionary
-  int rank;
+  // dictionary/repeat
   num baseEntropy;
-  num uppercaseEntropy;
-  bool l33t;
-  num l33tEntropy;
-  Map<String, String> sub;
-
-  String get subDisplay {
-    if (sub == null) {
-      return null;
-    }
-    return sub.toString();
-  }
 
   // match sequence
   int i;
@@ -240,11 +228,10 @@ class SequenceMatch extends Match {
 class RepeatMatch extends Match {
   // repeat
   String baseToken;
-  num baseEntropy;
   List<Match> baseMatches;
 
-  RepeatMatch({this.baseEntropy, this.baseToken, this.baseMatches, int i, int j, String token})
-      : super(pattern: 'repeat', i: i, j: j, token: token);
+  RepeatMatch({num baseEntropy, this.baseToken, this.baseMatches, int i, int j, String token})
+      : super(pattern: 'repeat', i: i, j: j, token: token, baseEntropy: baseEntropy);
 }
 
 class SpatialMatch extends Match {
@@ -476,8 +463,28 @@ num spatialEntropy(SpatialMatch match) {
   return entropy;
 }
 
-num dictionaryEntropy(Match match) {
-  match.baseEntropy = lg(match.rank);
+class DictionaryMatch extends Match {
+  DictionaryMatch({this.matchedWord, this.dictionaryName, this.rank, this.sub, this.l33t, String token})
+      : super(pattern: 'dictionary', token: token);
+
+  // dictionary
+  int rank;
+  num uppercaseEntropy;
+  bool l33t;
+  num l33tEntropy;
+  Map<String, String> sub;
+  String matchedWord;
+  String dictionaryName;
+  String get subDisplay {
+    if (sub == null) {
+      return null;
+    }
+    return sub.toString();
+  }
+}
+
+num dictionaryEntropy(DictionaryMatch match) {
+  match.baseEntropy = lg(match.rank); // keep these as properties for display purposes
   match.uppercaseEntropy = extraUppercaseEntropy(match);
   match.l33tEntropy = extraL33tEntropy(match);
   return match.baseEntropy + match.uppercaseEntropy + match.l33tEntropy;
@@ -537,7 +544,7 @@ num extraUppercaseEntropy(Match match) {
   return lg(possibilities);
 }
 
-num extraL33tEntropy(Match match) {
+num extraL33tEntropy(DictionaryMatch match) {
   var S, U, chr, chrs, extra_entropy, i, l, p, possibilities, ref1, subbed, unsubbed;
   if (match.l33t != true) {
     return 0;
