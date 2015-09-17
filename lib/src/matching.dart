@@ -138,7 +138,7 @@ List<scoring.Match> omnimatch(String password) {
   List<Function> matchers = [
     dictionaryMatch,
     reverseDictionaryMatch,
-    //l33tMatch, // TODO dart port test still fails for l33t
+    l33tMatch,
     spatialMatch,
     repeatMatch,
     sequenceMatch,
@@ -204,29 +204,15 @@ List<scoring.DictionaryMatch> reverseDictionaryMatch(password, [Map rankedDictio
   return sorted(matches);
 }
 
-/*
-reverse_dictionary_match: (password, _ranked_dictionaries = RANKED_DICTIONARIES) ->
-reversed_password = password.split('').reverse().join('')
-matches = @dictionary_match reversed_password, _ranked_dictionaries
-for match in matches
-match.token = match.token.split('').reverse().join('') # reverse back
-match.reversed = true
-# map coordinates back to original string
-[match.i, match.j] = [
-password.length - 1 - match.j
-password.length - 1 - match.i
-]
-@sorted matches
-*/
-
 // makes a pruned copy of l33t_table that only includes password's possible substitutions
-Map<String, List<String>> relevantL33tSubtable(String password, Map<String, List<String>> table) {
+Map<String, List<String>> relevantL33tSubtable(String password, Map<String, Iterable<String>> table) {
   Map passwordChars = {};
-  password.split('').forEach((String chr) {
+  for (int i = 0; i < password.length; i++) {
+    String chr = password[i];
     passwordChars[chr] = true;
-  });
+  }
   Map subtable = {};
-  table.forEach((letter, List<String> subs) {
+  table.forEach((letter, Iterable<String> subs) {
     List<String> relevantSubs = [];
     subs.forEach((String sub) {
       if (passwordChars.containsKey(sub)) {
@@ -322,7 +308,6 @@ List<List> sortListOfList(List<List> lists) {
 // returns the list of possible 1337 replacement dictionaries for a given password
 List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
   List<String> keys = new List.from(table.keys);
-  List<List<List<String>>> subs = [[]];
 
   List<List> dedup(List<List> subs_) {
     List<List> deduped = [];
@@ -351,6 +336,8 @@ List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
     return deduped;
   }
 
+  List<List<List<String>>> subs = [[]];
+
   void helper(List<String> keys) {
     if (keys.isEmpty) {
       return;
@@ -376,9 +363,8 @@ List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
           nextSubs.add(subExtension);
         } else {
           List subAlternative = new List.from(sub);
-          ;
-          subAlternative.insert(dupL33tIndex, 1);
-          subAlternative.addAll([l33tChr, firstKey]);
+          subAlternative.removeRange(dupL33tIndex, dupL33tIndex + 1);
+          subAlternative.add([l33tChr, firstKey]);
           nextSubs.add(sub);
           nextSubs.add(subAlternative);
         }

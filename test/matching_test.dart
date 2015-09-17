@@ -1216,8 +1216,7 @@ main() {
           included = true;
         }
       }
-      // TODO check result
-      //expect(included, isTrue, reason: "for ${password}, matches a ${patternName} pattern at [${i}, ${j}]");
+      expect(included, isTrue, reason: "for ${password}, matches a ${patternName} pattern at [${i}, ${j}]");
       expect(included, isNotNull); // dummy test
     });
   });
