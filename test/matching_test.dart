@@ -7,26 +7,7 @@ import "package:xcvbnm/src/scoring.dart" as scoring;
 
 main() {
   test('matching utils', () {
-    var chr_map,
-        dividend,
-        divisor,
-        lst,
-        lst1,
-        lst2,
-        m1,
-        m2,
-        m3,
-        m4,
-        m5,
-        m6,
-        map,
-        msg,
-        ref1,
-        ref2,
-        ref4,
-        remainder,
-        result,
-        string;
+    var chrMap, dividend, divisor, lst, lst1, lst2, m1, m2, m3, m4, m5, m6, map, msg, remainder, result, string;
     expect(empty([]), isTrue, reason: ".empty returns true for an empty array");
     expect(empty({}), isTrue, reason: ".empty returns true for an empty object");
 
@@ -47,36 +28,31 @@ main() {
     expect(lst, [1], reason: "extending an empty list with another makes it equal to the other");
     extend(lst, [2, 3]);
     expect(lst, [1, 2, 3], reason: "extending a list with another adds each of the other's elements");
-    ref1 = [
-      [1],
-      [2]
-    ];
-    lst1 = ref1[0];
-    lst2 = ref1[1];
+    lst1 = [1];
+    lst2 = [2];
     extend(lst1, lst2);
     expect(lst2, [2], reason: "extending a list by another doesn't affect the other");
-    chr_map = {'a': 'A', 'b': 'B'};
-    ref2 = [
-      ['a', chr_map, 'A'],
-      ['c', chr_map, 'c'],
-      ['ab', chr_map, 'AB'],
-      ['abc', chr_map, 'ABc'],
-      ['aa', chr_map, 'AA'],
-      ['abab', chr_map, 'ABAB'],
-      ['', chr_map, ''],
+
+    chrMap = {'a': 'A', 'b': 'B'};
+    for (List row in [
+      ['a', chrMap, 'A'],
+      ['c', chrMap, 'c'],
+      ['ab', chrMap, 'AB'],
+      ['abc', chrMap, 'ABc'],
+      ['aa', chrMap, 'AA'],
+      ['abab', chrMap, 'ABAB'],
+      ['', chrMap, ''],
       ['', {}, ''],
       ['abc', {}, 'abc']
-    ];
-    for (var row in ref2) {
+    ]) {
       string = row[0];
       map = row[1];
       result = row[2];
-
       msg = "translates '${string}' to '${result}' with provided charmap";
       expect(translate(string, map), result, reason: msg);
     }
 
-    ref4 = [
+    for (List row in [
       [
         [0, 1],
         0
@@ -109,11 +85,9 @@ main() {
         [6, 5],
         1
       ]
-    ];
-    for (var row in ref4) {
-      List result = row[0];
-      dividend = result[0];
-      divisor = result[1];
+    ]) {
+      dividend = row[0][0];
+      divisor = row[0][1];
       remainder = row[1];
       msg = "mod(${dividend},${divisor}) == ${remainder}";
       expect(mod(dividend, divisor), remainder, reason: msg);
@@ -126,7 +100,6 @@ main() {
         ..i = i
         ..j = j;
     }
-
     var data = [m(5, 5), m(6, 7), m(2, 5), m(0, 0), m(2, 3), m(0, 3)];
     m1 = data[0];
     m2 = data[1];

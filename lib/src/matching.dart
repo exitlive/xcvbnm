@@ -8,16 +8,17 @@ import 'dart:core' as core;
 import 'dart:core' hide Match;
 
 bool empty(var obj) {
+  // for array & map
   return obj.isEmpty;
 }
 
 extend(List lst, List lst2) => lst.addAll(lst2);
 
-String translate(String string, Map chr_map) {
+String translate(String string, Map chrMap) {
   var chr;
   List result = [];
   for (chr in string.split("")) {
-    var translated = chr_map[chr];
+    var translated = chrMap[chr];
     if (translated != null) {
       chr = translated;
     }
@@ -26,9 +27,11 @@ String translate(String string, Map chr_map) {
   return result.join("");
 }
 
+// mod impl that works for negative numbers
 int mod(int n, int m) => ((n % m) + m) % m;
 
 List<scoring.Match> sorted(List<scoring.Match> matches) {
+  // sort on i primary, j secondary
   matches.sort((m1, m2) {
     int iDiff = (m1.i - m2.i);
     if (iDiff == 0) {
