@@ -440,8 +440,8 @@ final num keypadStartingPositions = ((() {
 })()).length;
 
 num spatialEntropy(SpatialMatch match) {
-  var L, S, U, d, entropy, i, j, l, m, o, possibilities, possible_turns, ref, ref1, ref2, ref3, s, t;
-  if ((ref = match.graph) == 'qwerty' || ref == 'dvorak') {
+  var L, S, U, d, entropy, possibilities, possibleTurns, s, t;
+  if (['qwerty', 'dvorak'].contains(match.graph)) {
     s = keyboardStartingPositions;
     d = keyboardAverageDegree;
   } else {
@@ -451,17 +451,15 @@ num spatialEntropy(SpatialMatch match) {
   possibilities = 0;
   L = match.token.length;
   t = match.turns;
-  i = 2;
-  ref1 = L;
-  for (l = 2; 2 <= ref1 ? l <= ref1 : l >= ref1; i = (2 <= ref1 ? ++l : --l)) {
-    possible_turns = math.min(t, i - 1);
-    j = 1;
-    ref2 = possible_turns;
-    for (m = 1; 1 <= ref2 ? m <= ref2 : m >= ref2; j = (1 <= ref2 ? ++m : --m)) {
+  for (int i = 2; i <= L; i++) {
+    possibleTurns = math.min(t, i - 1);
+    for (int j = 1; j <= possibleTurns; j++) {
       possibilities += nCk(i - 1, j - 1) * s * math.pow(d, j);
     }
   }
   entropy = lg(possibilities);
+  // add extra entropy for shifted keys. (% instead of 5, A instead of a.)
+  // math is similar to extra entropy of l33t substitutions in dictionary matches.
   if (match.shiftedCount != null && match.shiftedCount > 0) {
     S = match.shiftedCount;
     U = match.token.length - match.shiftedCount;
@@ -469,9 +467,7 @@ num spatialEntropy(SpatialMatch match) {
       entropy += 1;
     } else {
       possibilities = 0;
-      i = 1;
-      ref3 = math.min(S, U);
-      for (o = 1; 1 <= ref3 ? o <= ref3 : o >= ref3; i = (1 <= ref3 ? ++o : --o)) {
+      for (int i = 1; i <= math.min(S, U); i++) {
         possibilities += nCk(S + U, i);
       }
       entropy += lg(possibilities);
