@@ -11,6 +11,7 @@ const int minYearSpace = 20;
 const int referenceYear = 2000;
 
 num nCk(n, k) {
+  // http://blog.plover.com/math/choose.html
   var d, l, r, ref;
   if (k > n) {
     return 0;
@@ -19,11 +20,7 @@ num nCk(n, k) {
     return 1;
   }
   r = 1;
-
-  d = 1;
-  l = 1;
-  ref = k;
-  for (; 1 <= ref ? l <= ref : l >= ref; d = 1 <= ref ? ++l : --l) {
+  for (d = 1; d <= k; d++) {
     r *= n;
     r /= d;
     n -= 1;
