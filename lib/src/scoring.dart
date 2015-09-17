@@ -544,53 +544,45 @@ num extraUppercaseEntropy(Match match) {
 }
 
 num extraL33tEntropy(DictionaryMatch match) {
-  var S, U, chr, chrs, extra_entropy, i, l, p, possibilities, ref1, subbed, unsubbed;
+  var chr, extraEntropy, i, possibilities;
   if (match.l33t != true) {
     return 0;
   }
-  extra_entropy = 0;
-  Map ref = match.sub;
-  for (subbed in ref.keys) {
-    unsubbed = ref[subbed];
-    chrs = match.token.toLowerCase().split('');
-    S = ((() {
-      var l, len, results;
-      results = [];
-      len = chrs.length;
-      for (l = 0; l < len; l++) {
-        chr = chrs[l];
-        if (chr == subbed) {
-          results.add(chr);
-        }
+  extraEntropy = 0;
+  match.sub.forEach((String subbed, String unsubbed) {
+    // lower-case match.token before calculating: capitalization shouldn't affect l33t calc.
+    String lowerToken = match.token.toLowerCase();
+    // num of subbed chars
+    int s = 0;
+    // num of unsubbed chars
+    int u = 0;
+    for (int i = 0; i < lowerToken.length; i++) {
+      chr = lowerToken[i];
+      if (chr == subbed) {
+        s++;
       }
-      return results;
-    })()).length;
-    U = ((() {
-      var l, len, results;
-      results = [];
-      len = chrs.length;
-      for (l = 0; l < len; l++) {
-        chr = chrs[l];
-        if (chr == unsubbed) {
-          results.add(chr);
-        }
+      if (chr == unsubbed) {
+        u++;
       }
-      return results;
-    })()).length;
-    if (S == 0 || U == 0) {
-      extra_entropy += 1;
-    } else {
-      p = math.min(U, S);
-      possibilities = 0;
-      i = 1;
-      ref1 = p;
-      for (l = 1; 1 <= ref1 ? l <= ref1 : l >= ref1; i = 1 <= ref1 ? ++l : --l) {
-        possibilities += nCk(U + S, i);
-      }
-      extra_entropy += lg(possibilities);
     }
-  }
-  return extra_entropy;
+
+    if (s == 0 || u == 0) {
+      // for this sub, password is either fully subbed (444) or fully unsubbed (aaa)
+      // treat that as doubling the space (attacker needs to try fully subbed chars in addition to
+      //# unsubbed.)
+      extraEntropy += 1;
+    } else {
+      // this case is similar to capitalization:
+      // with aa44a, U = 3, S = 2, attacker needs to try unsubbed + one sub + two subs
+
+      possibilities = 0;
+      for (i = 1; i <= math.min(u, s); i++) {
+        possibilities += nCk(u + s, i);
+      }
+      extraEntropy += lg(possibilities);
+    }
+  });
+  return extraEntropy;
 }
 
 xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) {

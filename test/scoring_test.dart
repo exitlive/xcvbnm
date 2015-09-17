@@ -321,6 +321,8 @@ main() {
     num shiftedEntropy;
 
     match = new SpatialMatch(token: 'zxcvbn', graph: 'qwerty', turns: 1, shiftedCount: 0);
+    // - 1 term because: not counting spatial patterns of length 1
+    // eg for length==6, multiplier is 5 for needing to try len2,len3,..,len6
     baseEntropy = lg(keyboardStartingPositions * keyboardAverageDegree * (match.token.length - 1));
     msg = "with no turns or shifts, entropy is lg(starts * degree * (len-1))";
     expect(spatialEntropy(match), baseEntropy, reason: msg);
