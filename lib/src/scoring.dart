@@ -338,23 +338,24 @@ num repeatEntropy(RepeatMatch match) {
 }
 
 num sequenceEntropy(SequenceMatch match) {
-  var base_entropy;
-  String first_chr = match.token[0];
-  if (['a', '1'].contains(first_chr)) {
-    base_entropy = 1;
+  num baseEntropy;
+  String firstChr = match.token[0];
+  // lower entropy for obvious starting points
+  if (['a', 'A', 'z', 'Z', '0', '1', '9'].contains(firstChr)) {
+    baseEntropy = 2;
   } else {
-    if (new RegExp(r"\d").hasMatch(first_chr)) {
-      base_entropy = lg(10);
-    } else if (new RegExp(r"[a-z]").hasMatch(first_chr)) {
-      base_entropy = lg(26);
+    if (new RegExp(r"\d").hasMatch(firstChr)) {
+      baseEntropy = lg(10); // digits
+    } else if (new RegExp(r"[a-z]").hasMatch(firstChr)) {
+      baseEntropy = lg(26); // lower
     } else {
-      base_entropy = lg(26) + 1;
+      baseEntropy = lg(26) + 1; // extra bit for uppercase
     }
   }
   if (!match.ascending) {
-    base_entropy += 1;
+    baseEntropy += 1;
   }
-  return base_entropy + lg(match.token.length);
+  return baseEntropy + lg(match.token.length);
 }
 
 num regexEntropy(RegexMatch match) {

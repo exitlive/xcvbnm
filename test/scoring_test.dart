@@ -265,23 +265,17 @@ main() {
   });
 
   test('sequenceEntropy', () {
-    var ascending, entropy, l, len, match, msg, ref, ref1, token;
-    ref = [
-      //['ab', true, lg(26) + lg(2)],
+    for (List row in [
+      ['ab', true, 2 + lg(2)],
       ['XYZ', true, lg(26) + 1 + lg(3)],
       ['4567', true, lg(10) + lg(4)],
       ['7654', false, lg(10) + lg(4) + 1],
-      ['ZYX', false, lg(26) + 1 + lg(3) + 1]
-    ];
-    len = ref.length;
-    for (l = 0; l < len; l++) {
-      ref1 = ref[l];
-      token = ref1[0];
-      ascending = ref1[1];
-      entropy = ref1[2];
-      match = new SequenceMatch(token: token, ascending: ascending);
-      msg = "the sequence pattern '${token}' has entropy of ${entropy}";
-      expect(sequenceEntropy(match), entropy, reason: msg);
+      ['ZYX', false, 2 + lg(3) + 1]
+    ]) {String token = row[0];
+      bool ascending = row[1];
+      num entropy = row[2];
+      SequenceMatch match = new SequenceMatch(token: token, ascending: ascending);
+      expect(sequenceEntropy(match), entropy, reason: "the sequence pattern '${token}' has entropy of ${entropy}");
     }
   });
 
