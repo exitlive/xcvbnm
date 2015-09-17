@@ -42,10 +42,10 @@ List<scoring.Match> sorted(List<scoring.Match> matches) {
   return matches;
 }
 
-Map<String, int> buildRankedDict(List ordered_list) {
+Map<String, int> buildRankedDict(List orderedList) {
   Map<String, int> result = {};
   var i = 1; // rank starts at 1, not 0
-  for (String word in ordered_list) {
+  for (String word in orderedList) {
     result[word] = i++;
   }
   return result;
@@ -174,20 +174,20 @@ List<scoring.DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_
 
 // makes a pruned copy of l33t_table that only includes password's possible substitutions
 Map<String, List<String>> relevantL33tSubtable(String password, Map<String, List<String>> table) {
-  Map password_chars = {};
+  Map passwordChars = {};
   password.split('').forEach((String chr) {
-    password_chars[chr] = true;
+    passwordChars[chr] = true;
   });
   Map subtable = {};
   table.forEach((letter, List<String> subs) {
-    List<String> relevant_subs = [];
+    List<String> relevantSubs = [];
     subs.forEach((String sub) {
-      if (password_chars.containsKey(sub)) {
-        relevant_subs.add(sub);
+      if (passwordChars.containsKey(sub)) {
+        relevantSubs.add(sub);
       }
     });
-    if (relevant_subs.isNotEmpty) {
-      subtable[letter] = relevant_subs;
+    if (relevantSubs.isNotEmpty) {
+      subtable[letter] = relevantSubs;
     }
   });
   return subtable;
@@ -537,30 +537,6 @@ List<scoring.RepeatMatch> repeatMatch(String password) {
         i: i, j: j, token: match[0], baseToken: baseToken, baseEntropy: baseEntropy, baseMatches: baseMatches));
     lastIndex = j + 1;
   }
-
-  /*
-    int j = i + 1;
-    while (true) {
-      String prevChar = password[j - 1];
-      String curChar;
-      if (j < password.length) {
-        curChar = password[j];
-      }
-      if (prevChar == curChar) {
-        j += 1;
-      } else {
-        j -= 1;
-        if (j - i + 1 >= minRepeatLength) {
-          matches
-              .add(new scoring.RepeatMatch(i: i, j: j, token: password.substring(i, j + 1), baseToken: password[i]));
-        }
-        break;
-      }
-    }
-    i = j + 1;
-  }
-  */
-  // return sorted(matches);
   return matches;
 }
 
