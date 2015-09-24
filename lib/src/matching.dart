@@ -204,6 +204,14 @@ List<scoring.DictionaryMatch> reverseDictionaryMatch(password, [Map rankedDictio
   return sorted(matches);
 }
 
+setUserInputDictionary(List<String> orderedList) {
+  rankedDictionaries['user_inputs'] = buildRankedDict(orderedList);
+}
+
+//
+// # dictionary match with common l33t substitutions
+//
+
 // makes a pruned copy of l33t_table that only includes password's possible substitutions
 Map<String, List<String>> relevantL33tSubtable(String password, Map<String, Iterable<String>> table) {
   Map passwordChars = {};

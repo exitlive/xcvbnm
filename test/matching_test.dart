@@ -444,6 +444,21 @@ main() {
       ndm(patterns[2], 245, "passwords"),
       ndm(patterns[3], 786, "male_names")
     ]);
+
+    setUserInputDictionary(['foo', 'bar']);
+    matches = dictionaryMatch('foobar');
+    matches = new List.from(matches.where((scoring.DictionaryMatch match) => match.dictionaryName == "user_inputs"));
+    msg = "matches with provided user input dictionary";
+    checkMatches(msg, matches, 'dictionary', [
+      'foo',
+      'bar'
+    ], [
+      [0, 2],
+      [3, 5]
+    ], [
+      ndm('foo', 1, "user_inputs"),
+      ndm('bar', 2, "user_inputs")
+    ]);
   });
 
   test('reverse dictionary matching', () {

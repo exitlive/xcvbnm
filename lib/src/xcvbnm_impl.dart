@@ -5,6 +5,13 @@ class _Xcvbnm extends Object implements Xcvbnm {
     Result result = new Result();
     Stopwatch sw = new Stopwatch();
     sw.start();
+
+    // reset the user inputs matcher on a per-request basis to keep things stateless
+    if (userInputs == null) {
+      userInputs = [];
+    }
+    matching.setUserInputDictionary(userInputs);
+
     List<scoring.Match> matches = matching.omnimatch(password);
     result = scoring.minimumEntropyMatchSequence(password, matches);
     sw.stop();
