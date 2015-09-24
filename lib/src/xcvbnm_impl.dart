@@ -15,7 +15,7 @@ class _Xcvbnm extends Object implements Xcvbnm {
 
 class _Result extends Object with Result {
   /// for debugging
-  Map toMap() {
+  Map toJson() {
     Map map = new Map();
     map["password"] = password;
     if (entropy != null) {
@@ -31,13 +31,13 @@ class _Result extends Object with Result {
       map["score"] = score;
     }
     if (calcTime != null) {
-      map["cacl_time"] = new Duration(milliseconds: calcTime);
+      map["calc_time"] = calcTime;
     }
     if (matchSequence != null && matchSequence.isNotEmpty) {
       List lst = [];
       map["match_equence"] = lst;
       for (Match match in matchSequence) {
-        lst.add(match.toMap());
+        lst.add(match.toJson());
       }
     }
     return map;

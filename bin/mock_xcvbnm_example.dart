@@ -2,6 +2,7 @@
 library xcvbnm.mock_example.bin;
 
 import 'package:xcvbnm/xcvbnm.dart';
+import 'dart:convert';
 
 class XcvbnmMock extends Object with Xcvbnm {
   int getNaiveScore(String password) {
@@ -25,5 +26,5 @@ main() {
 
   Xcvbnm xcvbnm = new Xcvbnm();
   Result result = xcvbnm.estimate(password);
-  print(result.toMap());
+  print(const JsonEncoder.withIndent("  ").convert(result.toJson()));
 }

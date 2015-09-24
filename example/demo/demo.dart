@@ -37,7 +37,7 @@ main() {
         ..text = line);
     }
 
-    print(result.toMap());
+    print(result.toJson());
     if (result.matchSequence != null && result.matchSequence.isNotEmpty) {
       int i = 1;
       DivElement matchesEl = new DivElement()..classes.add('app-matches');

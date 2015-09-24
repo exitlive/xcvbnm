@@ -194,13 +194,19 @@ class Match extends xcvbnm.Match {
   int i;
   int j;
 
-  toMap() {
+  toJson() {
     Map map = {};
     if (pattern != null) {
       map["pattern"] = pattern;
     }
     if (token != null) {
       map["token"] = token;
+    }
+    if (entropy != null) {
+      map["entropy"] = entropy;
+    }
+    if (baseEntropy != null) {
+      map["base_entropy"] = baseEntropy;
     }
     if (i != null) {
       map["i"] = i;
@@ -211,7 +217,7 @@ class Match extends xcvbnm.Match {
     return map;
   }
 
-  toString() => toMap().toString();
+  toString() => toJson().toString();
 }
 
 class SequenceMatch extends Match {
@@ -222,6 +228,21 @@ class SequenceMatch extends Match {
   String sequenceName;
   int sequenceSpace;
   bool ascending;
+
+  @override
+  toJson() {
+    Map map = super.toJson();
+    if (sequenceName != null) {
+      map["sequence_name"] = sequenceName;
+    }
+    if (sequenceSpace != null) {
+      map["sequence_space"] = sequenceSpace;
+    }
+    if (ascending != null) {
+      map["ascending"] = ascending;
+    }
+    return map;
+  }
 }
 
 class RepeatMatch extends Match {
@@ -231,6 +252,22 @@ class RepeatMatch extends Match {
 
   RepeatMatch({num baseEntropy, this.baseToken, this.baseMatches, int i, int j, String token})
       : super(pattern: 'repeat', i: i, j: j, token: token, baseEntropy: baseEntropy);
+
+  @override
+  toJson() {
+    Map map = super.toJson();
+    if (baseToken != null) {
+      map["base_token"] = baseToken;
+    }
+    if (baseMatches != null) {
+      List<Map> list = [];
+      for (Match match in baseMatches) {
+        list.add(match.toJson());
+      }
+      map["baseMatches"] = list;
+    }
+    return map;
+  }
 }
 
 class SpatialMatch extends Match {
@@ -241,6 +278,21 @@ class SpatialMatch extends Match {
 
   SpatialMatch({this.graph, this.shiftedCount, this.turns, int i, int j, String token})
       : super(pattern: 'spatial', i: i, j: j, token: token);
+
+  @override
+  toJson() {
+    Map map = super.toJson();
+    if (graph != null) {
+      map["graph"] = graph;
+    }
+    if (shiftedCount != null) {
+      map["shiftedCount"] = shiftedCount;
+    }
+    if (turns != null) {
+      map["turns"] = turns;
+    }
+    return map;
+  }
 }
 
 class RegexMatch extends Match {
@@ -252,8 +304,8 @@ class RegexMatch extends Match {
       : super(pattern: 'regex', i: i, j: j, token: token);
 
   @override
-  toMap() {
-    Map map = super.toMap();
+  toJson() {
+    Map map = super.toJson();
     if (regexName != null) {
       map["regexName"] = regexName;
     }
@@ -278,8 +330,8 @@ class DateMatch extends Match {
       : super(pattern: 'date', i: i, j: j, token: token);
 
   @override
-  Map<String, Object> toMap() {
-    Map map = super.toMap();
+  Map<String, Object> toJson() {
+    Map map = super.toJson();
     if (year != null) {
       map['year'] = year;
     }
@@ -493,6 +545,36 @@ class DictionaryMatch extends Match {
       return null;
     }
     return sub.toString();
+  }
+
+  @override
+  toJson() {
+    Map map = super.toJson();
+    if (reversed != null) {
+      map["reversed"] = reversed;
+    }
+    if (rank != null) {
+      map["rank"] = rank;
+    }
+    if (uppercaseEntropy != null) {
+      map["uppercase_entropy"] = uppercaseEntropy;
+    }
+    if (reversedEntropy != null) {
+      map["reversed_entropy"] = reversedEntropy;
+    }
+    if (l33t != null) {
+      map["l33t"] = l33t;
+    }
+    if (sub != null) {
+      map["sub"] = sub;
+    }
+    if (matchedWord != null) {
+      map["matched_word"] = matchedWord;
+    }
+    if (dictionaryName != null) {
+      map["dictionary_name"] = dictionaryName;
+    }
+    return map;
   }
 }
 

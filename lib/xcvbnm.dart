@@ -10,7 +10,7 @@ part 'src/xcvbnm_impl.dart';
 ///
 abstract class Match {
   /// js like output of the result
-  Map toMap();
+  Map toJson();
 }
 
 ///
@@ -46,7 +46,7 @@ abstract class Result {
   List<Match> matchSequence;
 
   /// js like output of the result
-  Map toMap();
+  Map toJson();
 }
 
 ///
