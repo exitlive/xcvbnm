@@ -1,5 +1,5 @@
 name: xcvbnm
-version: 0.3.5
+version: 0.3.6
 author: Werner Gaisbauer @ Exit Live, alex@tekartik.com
 description: This is intended as a Dart port of zxcvbn (see https://github.com/dropbox/zxcvbn).
 environment:

@@ -2,7 +2,7 @@ library xcvbnm.scoring;
 
 import 'dart:math' as math;
 import "adjacency_graphs.dart";
-import "xcvbnm_common.dart" as xcvbnm;
+import "../xcvbnm.dart" as xcvbnm;
 import 'dart:core';
 import 'dart:core' as core;
 

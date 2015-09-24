@@ -1,24 +1,45 @@
-library xcvbnm.impl;
+part of xcvbnm;
 
-import "xcvbnm_common.dart" hide Xcvbnm;
-import "xcvbnm_common.dart" as xcvbnm;
-import "matching.dart" as matching;
-import "scoring.dart" as scoring;
-
-class Xcvbnm extends xcvbnm.Xcvbnm {
+class _Xcvbnm extends Object implements Xcvbnm {
   Result estimate(String password, {List<String> userInputs}) {
     Result result = new Result();
     Stopwatch sw = new Stopwatch();
     sw.start();
-    //List<xcvbnm.Match> matches = matching.omnimatch(password);
     List<scoring.Match> matches = matching.omnimatch(password);
-    // for (xcvbnm.Match match in matches) {
-    //  print(match.toMap());
-    //}
     result = scoring.minimumEntropyMatchSequence(password, matches);
-    //result.calcTime = sw.elapsedMilliseconds;
     sw.stop();
     result.calcTime = sw.elapsedMilliseconds;
     return result;
+  }
+}
+
+class _Result extends Object with Result {
+  /// for debugging
+  Map toMap() {
+    Map map = new Map();
+    map["password"] = password;
+    if (entropy != null) {
+      map["entropy"] = entropy;
+    }
+    if (crackTime != null) {
+      map["crack_time"] = crackTime;
+    }
+    if (crackTimeDisplay != null) {
+      map["crack_time_display"] = crackTimeDisplay;
+    }
+    if (score != null) {
+      map["score"] = score;
+    }
+    if (calcTime != null) {
+      map["cacl_time"] = new Duration(milliseconds: calcTime);
+    }
+    if (matchSequence != null && matchSequence.isNotEmpty) {
+      List lst = [];
+      map["match_equence"] = lst;
+      for (Match match in matchSequence) {
+        lst.add(match.toMap());
+      }
+    }
+    return map;
   }
 }

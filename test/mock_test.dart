@@ -1,10 +1,27 @@
 library xcvbnm_test;
 
 import 'package:test/test.dart';
-import 'package:xcvbnm/mock_xcvbnm.dart';
+import 'package:xcvbnm/xcvbnm.dart';
+
+class XcvbnmMock extends Object implements Xcvbnm {
+  int getNaiveScore(String password) {
+    if (password.length < 3) return 0;
+    if (password.length < 5) return 1;
+    if (password.length < 7) return 2;
+    if (password.length < 9) return 3;
+    if (password.length < 11) return 3;
+    return 4;
+  }
+
+  Result estimate(String password, {List<String> userInputs}) {
+    return new Result()
+      ..score = getNaiveScore(password)
+      ..password = password;
+  }
+}
 
 void main() {
-  var xcvbnm = new Xcvbnm();
+  Xcvbnm xcvbnm = new XcvbnmMock();
 
   group('mock', () {
     test('test with score 0', () async {

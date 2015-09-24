@@ -1,7 +1,7 @@
 library xcvbnm.xcvbnm_test;
 
 import 'package:test/test.dart';
-import 'package:xcvbnm/src/xcvbnm_impl.dart';
+import 'package:xcvbnm/xcvbnm.dart';
 
 void main() {
   var xcvbnm = new Xcvbnm();

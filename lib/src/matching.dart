@@ -3,7 +3,7 @@ library xcvbnm.matching;
 import "scoring.dart" as scoring;
 import 'frequency_lists.dart';
 import 'adjacency_graphs.dart';
-import "xcvbnm_common.dart" as xcvbnm;
+import "../xcvbnm.dart" as xcvbnm;
 import 'dart:core' as core;
 import 'dart:core' hide Match;
 
