@@ -4,7 +4,7 @@ authors:
 - Werner Gaisbauer <werner.gaisbauer@exitlive.io>
 - Alex Tekartik <alex@tekartik.com>
 - Matias Meno <matias.meno@exitlive.io>
-description: This is intended as a Dart port of zxcvbn (see https://github.com/dropbox/zxcvbn).
+description: This is a dart port of zxcvbn (see https://github.com/dropbox/zxcvbn).
 environment:
   sdk: '>=1.9.0 <2.0.0'
 dependencies:
