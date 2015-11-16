@@ -9,6 +9,8 @@ const String _HELP = 'help';
 const String _MATCH = 'match';
 const String _DEPENDENCY = 'dependency';
 
+Xcvbnm xcvbnm = new Xcvbnm();
+
 main(List<String> args) {
   int maxMatchToDisplay = 4;
 
@@ -37,7 +39,7 @@ main(List<String> args) {
     passwords = testPasswords.split('\n');
   }
   for (String password in passwords) {
-    Result result = xcvbnm(password);
+    Result result = xcvbnm.estimate(password);
 
     print("----- Result ------");
     print("password:           ${result.password}");

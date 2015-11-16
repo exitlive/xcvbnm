@@ -1,10 +1,9 @@
 library xcvbnm.scoring;
 
 import 'dart:math' as math;
-import "adjacency_graphs.dart";
-import "../xcvbnm.dart" as xcvbnm;
-import 'dart:core';
-import 'dart:core' as core;
+import 'adjacency_graphs.dart';
+import 'xcvbnm.dart';
+import 'result.dart';
 
 // single guess time (10ms) over number of cores guessing in parallel
 // for a hash function like bcrypt/scrypt/PBKDF2, 10ms per guess is a safe lower bound.
@@ -177,7 +176,7 @@ String displayTime(num seconds) {
   return displayStr;
 }
 
-class Match extends xcvbnm.Match {
+class Match {
   String pattern;
 
   num entropy;
@@ -195,24 +194,10 @@ class Match extends xcvbnm.Match {
   int j;
 
   toJson() {
-    Map map = {};
-    if (pattern != null) {
-      map["pattern"] = pattern;
-    }
-    if (token != null) {
-      map["token"] = token;
-    }
-    if (entropy != null) {
-      map["entropy"] = entropy;
-    }
-    if (baseEntropy != null) {
-      map["base_entropy"] = baseEntropy;
-    }
-    if (i != null) {
-      map["i"] = i;
-    }
-    if (j != null) {
-      map["j"] = j;
+    Map map = {'pattern': pattern, 'token': token, 'entropy': entropy, 'base_entropy': baseEntropy, 'i': i, 'j': j};
+    for (var key in map.keys.toList()) {
+      // Remove null values from map
+      if (map[key] == null) map.remove(key);
     }
     return map;
   }
@@ -690,7 +675,7 @@ class BruteforceMatch extends Match {
  * takes a list of overlapping matches, returns the non-overlapping sublist with
  * minimum entropy. O(nm) dp alg for length-n password with m candidate matches.
  */
-xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) {
+Result minimumEntropyMatchSequence(String password, List<Match> matches) {
   num candidateEntropy, crackTime, minEntropy;
   int i, j, k;
   List upToK;
@@ -782,7 +767,7 @@ xcvbnm.Result minimumEntropyMatchSequence(String password, List<Match> matches) 
   crackTime = entropyToCrackTime(minEntropy);
 
   // final result object
-  return new xcvbnm.Result()
+  return new Result()
     ..password = password
     ..entropy = roundToXDigits(minEntropy, 3)
     ..matchSequence = matchSequence
