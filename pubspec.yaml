@@ -9,8 +9,5 @@ description: This is a dart port of zxcvbn (see https://github.com/dropbox/zxcvb
 environment:
   sdk: '>=1.9.0 <2.0.0'
 dev_dependencies:
-  dart_to_js_script_rewriter: ^0.1.0
   test: ^0.12.0
   browser: any
-transformers:
-- dart_to_js_script_rewriter
