@@ -51,7 +51,7 @@ class Result {
 
     if (matchSequence != null && matchSequence.isNotEmpty) {
       List lst = [];
-      map['match_equence'] = lst;
+      map['match_sequence'] = lst;
       for (scoring.Match match in matchSequence) {
         lst.add(match.toJson());
       }
