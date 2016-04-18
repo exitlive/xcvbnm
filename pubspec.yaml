@@ -1,10 +1,11 @@
 name: xcvbnm
-version: 0.5.1
+version: 0.5.2
 homepage: https://github.com/exitlive/xcvbnm
 authors:
 - Werner Gaisbauer <werner.gaisbauer@exitlive.io>
 - Alex Tekartik <alex@tekartik.com>
 - Matias Meno <matias.meno@exitlive.io>
+- Martin Flucka <martin.flucka@gmail.com>
 description: This is a dart port of zxcvbn (see https://github.com/dropbox/zxcvbn).
 environment:
   sdk: '>=1.9.0 <2.0.0'
