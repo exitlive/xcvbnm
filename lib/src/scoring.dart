@@ -1,10 +1,10 @@
 library xcvbnm.scoring;
 
 import 'dart:math' as math;
-import 'adjacency_graphs.dart';
-import 'xcvbnm.dart';
-import 'result.dart';
+
+import 'package:xcvbnm/src/adjacency_graphs.dart';
 import 'package:xcvbnm/src/feedback.dart';
+import 'package:xcvbnm/src/result.dart';
 
 // single guess time (10ms) over number of cores guessing in parallel
 // for a hash function like bcrypt/scrypt/PBKDF2, 10ms per guess is a safe lower bound.

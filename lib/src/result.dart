@@ -1,6 +1,6 @@
 library xcvbnm.result;
 
-import 'scoring.dart' as scoring;
+import 'package:xcvbnm/src/scoring.dart' as scoring;
 
 /// [Xcvbnm] estimate result
 class Result {

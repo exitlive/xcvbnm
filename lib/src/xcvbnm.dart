@@ -1,8 +1,8 @@
 library xcvbnm.core;
 
-import 'matching.dart' as matching;
-import 'scoring.dart' as scoring;
-import 'result.dart';
+import 'package:xcvbnm/src/result.dart';
+import 'package:xcvbnm/src/scoring.dart' as scoring;
+import 'package:xcvbnm/src/matching.dart' as matching;
 
 class Xcvbnm {
   /// Estimate the strenght of password
