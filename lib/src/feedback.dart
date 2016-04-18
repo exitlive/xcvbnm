@@ -3,22 +3,21 @@ library xcvbnm.feedback;
 import 'package:xcvbnm/src/scoring.dart' as scoring;
 
 class Feedback {
-  static final String generalSuggestion = 'Use a few words, avoid common phrases\n'
+  static final String generalSuggestion = 'Use a few words, avoid common phrases. '
       'No need for symbols, digits, or uppercase letters';
-  static final String spatialSingleTurnSuggestion = 'Straight rows of keys are easy to guess\n'
+  static final String spatialSingleTurnSuggestion = 'Straight rows of keys are easy to guess. '
       'Use a longer keyboard pattern with more turns';
-  static final String spatialMultiTurnSuggestion = 'Short keyboard patterns are easy to guess\n'
+  static final String spatialMultiTurnSuggestion = 'Short keyboard patterns are easy to guess. '
       'Use a longer keyboard pattern with more turns';
-  static final String repeatSingleCharSuggestion = 'Repeats like \'aaa\' are easy to guess\n'
+  static final String repeatSingleCharSuggestion = 'Repeats like \'aaa\' are easy to guess. '
       'Avoid repeated words and characters';
   static final String repeatMultiCharSuggestion =
-      'Repeats like \'abcabcabc\' are only slightly harder to guess than \'abc\'\n'
+      'Repeats like \'abcabcabc\' are only slightly harder to guess than \'abc\'. '
       'Avoid repeated words and characters';
-  static final String sequenceSuggestion = 'Sequences like abc or 6543 are easy to guess\n'
+  static final String sequenceSuggestion = 'Sequences like abc or 6543 are easy to guess. '
       'Avoid sequences';
-  static final String recentYearSuggestion = 'Recent years are easy to guess\n'
-      'Avoid recent years\n'
-      'Avoid years that are associated with you';
+  static final String recentYearSuggestion = 'Recent years are easy to guess. '
+      'Avoid recent years and years that are associated with you';
   static final String dateSuggestion =
       'Dates are often easy to guess' 'Avoid dates and years that are associated with you';
   static final String top10PasswordSuggestion = 'This is a top-10 common password';
