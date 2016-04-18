@@ -2,8 +2,8 @@
 library xcvbnm.bin;
 
 import 'package:args/args.dart';
-import 'package:xcvbnm/xcvbnm.dart';
 import 'package:xcvbnm/src/scoring.dart' as scoring;
+import 'package:xcvbnm/xcvbnm.dart';
 
 const String _HELP = 'help';
 const String _MATCH = 'match';

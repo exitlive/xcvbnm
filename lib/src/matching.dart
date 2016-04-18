@@ -1,11 +1,12 @@
 library xcvbnm.matching;
 
-import "scoring.dart" as scoring;
-import 'frequency_lists.dart';
-import 'adjacency_graphs.dart';
-import "../xcvbnm.dart" as xcvbnm;
 import 'dart:core' as core;
 import 'dart:core' hide Match;
+
+import 'package:xcvbnm/src/adjacency_graphs.dart';
+import 'package:xcvbnm/src/frequency_lists.dart';
+import 'package:xcvbnm/src/result.dart';
+import 'package:xcvbnm/src/scoring.dart' as scoring;
 
 bool empty(var obj) {
   // for array & map
@@ -571,7 +572,7 @@ List<scoring.RepeatMatch> repeatMatch(String password) {
     int j = lastIndex + match.start + match.group(0).length - 1;
 
     // recursively match and score the base string
-    xcvbnm.Result baseAnalysis = scoring.minimumEntropyMatchSequence(baseToken, omnimatch(baseToken));
+    Result baseAnalysis = scoring.minimumEntropyMatchSequence(baseToken, omnimatch(baseToken));
     List<scoring.Match> baseMatches = baseAnalysis.matchSequence;
     num baseEntropy = baseAnalysis.entropy;
     matches.add(new scoring.RepeatMatch(

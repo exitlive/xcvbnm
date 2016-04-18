@@ -1,9 +1,10 @@
 library xcvbnm.scoring;
 
 import 'dart:math' as math;
-import 'adjacency_graphs.dart';
-import 'xcvbnm.dart';
-import 'result.dart';
+
+import 'package:xcvbnm/src/adjacency_graphs.dart';
+import 'package:xcvbnm/src/feedback.dart';
+import 'package:xcvbnm/src/result.dart';
 
 // single guess time (10ms) over number of cores guessing in parallel
 // for a hash function like bcrypt/scrypt/PBKDF2, 10ms per guess is a safe lower bound.
@@ -437,7 +438,8 @@ _calcAverageDegree(Map graph) {
         }
       }
       return results;
-    })()).length;
+    })())
+        .length;
   }
   average /= ((() {
     var results;
@@ -447,7 +449,8 @@ _calcAverageDegree(Map graph) {
       results.add(k);
     }
     return results;
-  })()).length;
+  })())
+      .length;
   return average;
 }
 
@@ -462,7 +465,8 @@ final num keyboardStartingPositions = ((() {
     results.add(k);
   }
   return results;
-})()).length;
+})())
+    .length;
 final num keypadStartingPositions = ((() {
   var results;
   Map ref = adjacencyGraphs["keypad"];
@@ -472,7 +476,8 @@ final num keypadStartingPositions = ((() {
     results.add(k);
   }
   return results;
-})()).length;
+})())
+    .length;
 
 num spatialEntropy(SpatialMatch match) {
   var tokenLength, sc, uc, d, entropy, possibilities, possibleTurns, s, t;
@@ -766,14 +771,17 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
   minEntropy = _safeArrayValue(upToK, password.length - 1);
   crackTime = entropyToCrackTime(minEntropy);
 
+  var score = crackTimeToScore(crackTime);
+
   // final result object
   return new Result()
     ..password = password
     ..entropy = roundToXDigits(minEntropy, 3)
     ..matchSequence = matchSequence
+    ..feedback = new Feedback(score, matchSequence).toString()
     ..crackTime = roundToXDigits(crackTime, 3)
     ..crackTimeDisplay = displayTime(crackTime)
-    ..score = crackTimeToScore(crackTime);
+    ..score = score;
 }
 
 int roundToXDigits(n, x) {
