@@ -438,7 +438,8 @@ _calcAverageDegree(Map graph) {
         }
       }
       return results;
-    })()).length;
+    })())
+        .length;
   }
   average /= ((() {
     var results;
@@ -448,7 +449,8 @@ _calcAverageDegree(Map graph) {
       results.add(k);
     }
     return results;
-  })()).length;
+  })())
+      .length;
   return average;
 }
 
@@ -463,7 +465,8 @@ final num keyboardStartingPositions = ((() {
     results.add(k);
   }
   return results;
-})()).length;
+})())
+    .length;
 final num keypadStartingPositions = ((() {
   var results;
   Map ref = adjacencyGraphs["keypad"];
@@ -473,7 +476,8 @@ final num keypadStartingPositions = ((() {
     results.add(k);
   }
   return results;
-})()).length;
+})())
+    .length;
 
 num spatialEntropy(SpatialMatch match) {
   var tokenLength, sc, uc, d, entropy, possibilities, possibleTurns, s, t;
