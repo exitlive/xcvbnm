@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'adjacency_graphs.dart';
 import 'xcvbnm.dart';
 import 'result.dart';
+import 'package:xcvbnm/src/feedback.dart';
 
 // single guess time (10ms) over number of cores guessing in parallel
 // for a hash function like bcrypt/scrypt/PBKDF2, 10ms per guess is a safe lower bound.
@@ -771,6 +772,7 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
     ..password = password
     ..entropy = roundToXDigits(minEntropy, 3)
     ..matchSequence = matchSequence
+    ..feedback = new Feedback(score, matchSequence).toString()
     ..crackTime = roundToXDigits(crackTime, 3)
     ..crackTimeDisplay = displayTime(crackTime)
     ..score = crackTimeToScore(crackTime);

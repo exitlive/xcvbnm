@@ -2,6 +2,7 @@ library xcvbnm.xcvbnm_test;
 
 import 'package:test/test.dart';
 import 'package:xcvbnm/xcvbnm.dart';
+import 'package:xcvbnm/src/feedback.dart';
 
 void main() {
   var xcvbnm = new Xcvbnm();
@@ -54,6 +55,61 @@ void main() {
         var result = xcvbnm.estimate(password);
         expect(result, isNotNull);
       }
+    });
+  });
+  group('feedback', () {
+    test('general suggestion', () async {
+      var result = xcvbnm.estimate('foo');
+      expect(result.feedback, Feedback.generalSuggestion);
+    });
+    test('spatial single turn', () async {
+      var result = xcvbnm.estimate('qwertyuiop[');
+      expect(result.feedback, Feedback.spatialSingleTurnSuggestion);
+    });
+    test('spatial multi turn', () async {
+      var result = xcvbnm.estimate('asdfgfdsa');
+      expect(result.feedback, Feedback.spatialMultiTurnSuggestion);
+    });
+    test('repeating single char', () async {
+      var result = xcvbnm.estimate('aaaa');
+      expect(result.feedback, Feedback.repeatSingleCharSuggestion);
+    });
+    test('repeating muli char', () async {
+      var result = xcvbnm.estimate('abuabuabu');
+      expect(result.feedback, Feedback.repeatMultiCharSuggestion);
+    });
+    test('sequence', () async {
+      var result = xcvbnm.estimate('8765432');
+      expect(result.feedback, Feedback.sequenceSuggestion);
+    });
+    test('recent year', () async {
+      var year = new DateTime.now().year;
+      var result = xcvbnm.estimate('itIs$year');
+      expect(result.feedback, Feedback.recentYearSuggestion);
+    });
+    test('date', () async {
+      var result = xcvbnm.estimate('4101980');
+      expect(result.feedback, Feedback.dateSuggestion);
+    });
+    test('top10', () async {
+      var result = xcvbnm.estimate('password');
+      expect(result.feedback, Feedback.top10PasswordSuggestion);
+    });
+    test('top100', () async {
+      var result = xcvbnm.estimate('love');
+      expect(result.feedback, Feedback.top100PasswordSuggestion);
+    });
+    test('common', () async {
+      var result = xcvbnm.estimate('zxcvbnm');
+      expect(result.feedback, Feedback.commonPasswordSuggestion);
+    });
+    test('english', () async {
+      var result = xcvbnm.estimate('procrastination');
+      expect(result.feedback, Feedback.englishWordSuggestion);
+    });
+    test('name', () async {
+      var result = xcvbnm.estimate('DonaldDrumpf');
+      expect(result.feedback, Feedback.nameSuggestion);
     });
   });
 }

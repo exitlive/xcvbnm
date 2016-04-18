@@ -21,6 +21,9 @@ class Result {
   /// (useful for implementing a strength bar.)
   int score;
 
+  /// verbal feedback to help choose better passwords. set when score <= 2.
+  String feedback;
+
   /// how long it took xcvbnm to calculate an answer,
   /// in milliseconds.
   int calcTime;
@@ -37,6 +40,7 @@ class Result {
       'crack_time': crackTime,
       'crack_time_display': crackTimeDisplay,
       'score': score,
+      'feedback': feedback,
       'calc_time': calcTime,
     };
 
