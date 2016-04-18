@@ -771,6 +771,8 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
   minEntropy = _safeArrayValue(upToK, password.length - 1);
   crackTime = entropyToCrackTime(minEntropy);
 
+  var score = crackTimeToScore(crackTime);
+
   // final result object
   return new Result()
     ..password = password
@@ -779,7 +781,7 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
     ..feedback = new Feedback(score, matchSequence).toString()
     ..crackTime = roundToXDigits(crackTime, 3)
     ..crackTimeDisplay = displayTime(crackTime)
-    ..score = crackTimeToScore(crackTime);
+    ..score = score;
 }
 
 int roundToXDigits(n, x) {
