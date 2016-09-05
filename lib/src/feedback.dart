@@ -3,8 +3,7 @@ library xcvbnm.feedback;
 import 'package:xcvbnm/src/scoring.dart' as scoring;
 
 class Feedback {
-  static final String generalSuggestion = 'Use a few words, avoid common phrases. '
-      'No need for symbols, digits, or uppercase letters.';
+  static final String generalSuggestion = 'Use a few words, avoid common phrases.';
   static final String spatialSingleTurnSuggestion = 'Straight rows of keys are easy to guess. '
       'Use a longer keyboard pattern with more turns.';
   static final String spatialMultiTurnSuggestion = 'Short keyboard patterns are easy to guess. '
