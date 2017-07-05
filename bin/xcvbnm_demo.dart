@@ -11,21 +11,21 @@ const String _DEPENDENCY = 'dependency';
 
 Xcvbnm xcvbnm = new Xcvbnm();
 
-main(List<String> args) {
+void main(List<String> args) {
   int maxMatchToDisplay = 4;
 
-  ArgParser parser = new ArgParser(allowTrailingOptions: true);
+  final parser = new ArgParser(allowTrailingOptions: true);
   parser.addFlag(_HELP, abbr: 'h', help: 'Usage help', negatable: false);
   parser.addOption(_MATCH, abbr: 'm', help: 'Max number max of match to display', defaultsTo: "${maxMatchToDisplay}");
-  ArgResults _argsResult = parser.parse(args);
+  final _argsResult = parser.parse(args);
 
-  bool help = _argsResult[_HELP];
+  final bool help = _argsResult[_HELP];
   if (help) {
     print(parser.usage);
     return;
   }
 
-  String param = _argsResult[_MATCH];
+  final String param = _argsResult[_MATCH];
   if (param != null) {
     maxMatchToDisplay = int.parse(param, onError: (_) => maxMatchToDisplay);
   }
@@ -33,13 +33,13 @@ main(List<String> args) {
   List<String> passwords = _argsResult.rest;
   if (passwords == null || passwords.isEmpty) {
     // godle sample of data
-    String testPasswords =
+    final testPasswords =
         'zxcvbn\nqwER43@!\nTr0ub4dour&3\ncorrecthorsebatterystaple\ncoRrecth0rseba++ery9.23.2007staple\$\n\nD0g..................\nabcdefghijk987654321\nneverforget13/3/1997\n1qaz2wsx3edc\n\ntemppass22\nbriansmith\nbriansmith4mayor\npassword1\nviking\nthx1138\nScoRpi0ns\ndo you know\n\nryanhunter2000\nrianhunter2000\n\nasdfghju7654rewq\nAOEUIDHG&*()LS_\n\n12345678\ndefghi6789\n\nrosebud\nRosebud\nROSEBUD\nrosebuD\nros3bud99\nr0s3bud99\nR0\$38uD99\n\nverlineVANDERMARK\n\neheuczkqyq\nrWibMFACxAUGZmxhVncy\nBa9ZyWABu99[BK#6MBgbH88Tofv)vs\$w';
 
     passwords = testPasswords.split('\n');
   }
   for (String password in passwords) {
-    Result result = xcvbnm.estimate(password);
+    final result = xcvbnm.estimate(password);
 
     print("----- Result ------");
     print("password:           ${result.password}");

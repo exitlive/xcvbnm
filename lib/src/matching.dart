@@ -13,7 +13,7 @@ bool empty(var obj) {
   return obj.isEmpty;
 }
 
-extend(List lst, List lst2) => lst.addAll(lst2);
+void extend(List lst, List lst2) => lst.addAll(lst2);
 
 String translate(String string, Map chrMap) {
   var chr;
@@ -130,10 +130,7 @@ Map<int, List<List<int>>> dateSplits = {
   ]
 };
 
-/**
- * omnimatch -- combine everything
- */
-
+/// omnimatch -- combine everything
 List<scoring.Match> omnimatch(String password) {
   List<scoring.Match> matches = [];
   List<Function> matchers = [
@@ -154,33 +151,30 @@ List<scoring.Match> omnimatch(String password) {
   return sorted(matches);
 }
 
-/**
- * dictionary match (common passwords, english, last names, etc) ----------------
- */
-
-List<scoring.DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_]) {
+/// dictionary match (common passwords, english, last names, etc) ----------------
+List<scoring.DictionaryMatch> dictionaryMatch(password, [Map _rankedDictionaries]) {
   // _ranked_dictionaries variable is for unit testing purposes
   var len, matches, rank, word;
-  if (rankedDictionaries_ == null) {
-    rankedDictionaries_ = rankedDictionaries;
+  if (_rankedDictionaries == null) {
+    _rankedDictionaries = rankedDictionaries;
   }
   matches = [];
   len = password.length;
-  String password_lower = password.toLowerCase();
-  rankedDictionaries_.forEach((dictionary_name, Map<String, int> ranked_dict) {
+  String passwordLower = password.toLowerCase();
+  _rankedDictionaries.forEach((dictionaryName, Map<String, int> rankedDict) {
     for (int i = 0; i < len; i++) {
       for (int j = i; j < len; j++) {
-        word = password_lower.substring(i, j + 1);
+        word = passwordLower.substring(i, j + 1);
 
-        if (ranked_dict.containsKey(word)) {
-          rank = ranked_dict[word];
+        if (rankedDict.containsKey(word)) {
+          rank = rankedDict[word];
           matches.add(new scoring.DictionaryMatch()
             ..i = i
             ..j = j
             ..token = password.substring(i, j + 1)
             ..matchedWord = word
             ..rank = rank
-            ..dictionaryName = dictionary_name);
+            ..dictionaryName = dictionaryName);
         }
       }
     }
@@ -188,12 +182,12 @@ List<scoring.DictionaryMatch> dictionaryMatch(password, [Map rankedDictionaries_
   return sorted(matches);
 }
 
-List<scoring.DictionaryMatch> reverseDictionaryMatch(password, [Map rankedDictionaries_]) {
-  if (rankedDictionaries_ == null) {
-    rankedDictionaries_ = rankedDictionaries;
+List<scoring.DictionaryMatch> reverseDictionaryMatch(password, [Map _rankedDictionaries]) {
+  if (_rankedDictionaries == null) {
+    _rankedDictionaries = rankedDictionaries;
   }
   String reversePassword = password.split('').reversed.join();
-  List<scoring.DictionaryMatch> matches = dictionaryMatch(reversePassword, rankedDictionaries_);
+  List<scoring.DictionaryMatch> matches = dictionaryMatch(reversePassword, _rankedDictionaries);
   for (var match in matches) {
     match.token = match.token.split('').reversed.join(); // reverse back
     match.reversed = true;
@@ -205,7 +199,7 @@ List<scoring.DictionaryMatch> reverseDictionaryMatch(password, [Map rankedDictio
   return sorted(matches);
 }
 
-setUserInputDictionary(List<String> orderedList) {
+void setUserInputDictionary(List<String> orderedList) {
   rankedDictionaries['user_inputs'] = buildRankedDict(orderedList);
 }
 
@@ -235,14 +229,12 @@ Map<String, List<String>> relevantL33tSubtable(String password, Map<String, Iter
   return subtable;
 }
 
-/**
- * not supported in dart
- * in javascript, it compares the first element, if null put it at the end, if empty at the beginnin
- * it handles list recursively
- *
- * [[2, 3], [1, 2], null, [], 1, 3] => [[], 1, [1, 2], [2, 3], 3, null]
- * @return the list itself
- */
+/// not supported in dart
+/// in javascript, it compares the first element, if null put it at the end, if empty at the beginnin
+/// it handles list recursively
+///
+/// [[2, 3], [1, 2], null, [], 1, 3] => [[], 1, [1, 2], [2, 3], 3, null]
+/// @return the list itself
 List<List> sortListOfList(List<List> lists) {
   int compareValue(var v1, var v2) {
     try {
@@ -255,7 +247,9 @@ List<List> sortListOfList(List<List> lists) {
         return -1;
       }
       return v1.compareTo(v2);
-    } catch (e) {}
+    } catch (e) {
+      // Ignore
+    }
     return 0;
   }
   //
@@ -318,11 +312,11 @@ List<List> sortListOfList(List<List> lists) {
 List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
   List<String> keys = new List.from(table.keys);
 
-  List<List> dedup(List<List> subs_) {
+  List<List> dedup(List<List> _subs) {
     List<List> deduped = [];
     Map<String, bool> members = {};
 
-    subs_.forEach((List sub) {
+    _subs.forEach((List sub) {
       List<List> assoc = [];
       for (int v = 0; v < sub.length; v++) {
         var k = sub[v];
@@ -388,9 +382,9 @@ List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
   for (var sub in subs) {
     Map<String, String> subDict = {};
     sub.forEach((List data) {
-      String l33t_chr = data[0];
+      String l33tChr = data[0];
       String chr = data[1];
-      subDict[l33t_chr] = chr;
+      subDict[l33tChr] = chr;
     });
     subDicts.add(subDict);
   }
@@ -398,22 +392,22 @@ List<Map> enumerateL33tSubs(Map<String, List<String>> table) {
 }
 
 List<scoring.DictionaryMatch> l33tMatch(String password,
-    [Map<String, Map<String, int>> rankedDictionaries_, Map<String, List<String>> l33tTable_]) {
+    [Map<String, Map<String, int>> _rankedDictionaries, Map<String, List<String>> _l33tTable]) {
   List<scoring.DictionaryMatch> matches = [];
-  if (rankedDictionaries_ == null) {
-    rankedDictionaries_ = rankedDictionaries;
+  if (_rankedDictionaries == null) {
+    _rankedDictionaries = rankedDictionaries;
   }
-  if (l33tTable_ == null) {
-    l33tTable_ = l33tTable;
+  if (_l33tTable == null) {
+    _l33tTable = l33tTable;
   }
 
-  for (Map sub in enumerateL33tSubs(relevantL33tSubtable(password, l33tTable_))) {
+  for (Map sub in enumerateL33tSubs(relevantL33tSubtable(password, _l33tTable))) {
     // corner case: password has no relevant subs.
     if (sub.isEmpty) {
       break;
     }
     String subbedPassword = translate(password, sub);
-    dictionaryMatch(subbedPassword, rankedDictionaries_).forEach((scoring.DictionaryMatch match) {
+    dictionaryMatch(subbedPassword, _rankedDictionaries).forEach((scoring.DictionaryMatch match) {
       String token = password.substring(match.i, match.j + 1);
       if (token.toLowerCase() != match.matchedWord) {
         Map matchSub = {};
@@ -435,16 +429,13 @@ List<scoring.DictionaryMatch> l33tMatch(String password,
   return matches;
 }
 
-/**
- * spatial match (qwerty/dvorak/keypad)
- */
-
-List<scoring.SpatialMatch> spatialMatch(String password, [Map<String, Map<String, List<String>>> graphs_]) {
-  if (graphs_ == null) {
-    graphs_ = adjacencyGraphs;
+/// spatial match (qwerty/dvorak/keypad)
+List<scoring.SpatialMatch> spatialMatch(String password, [Map<String, Map<String, List<String>>> _graphs]) {
+  if (_graphs == null) {
+    _graphs = adjacencyGraphs;
   }
   List<scoring.Match> matches = [];
-  graphs_.forEach((graphName, graph) {
+  _graphs.forEach((graphName, graph) {
     matches.addAll(spatialMatchHelper(password, graph, graphName));
   });
   sorted(matches);
@@ -458,7 +449,7 @@ List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<
   int i = 0;
   while (i < password.length - 1) {
     int j = i + 1;
-    int lastDirection = null;
+    int lastDirection;
     int turns = 0;
     int shiftedCount;
     if (['qwerty', 'dvorak'].contains(graphName) && shiftedRx.hasMatch(password.substring(i, j))) {
@@ -528,9 +519,7 @@ List<scoring.SpatialMatch> spatialMatchHelper(String password, Map<String, List<
   return matches;
 }
 
-/**
- * repeats (aaa, abcabcabc) and sequences (abcdef)
- */
+/// repeats (aaa, abcabcabc) and sequences (abcdef)
 List<scoring.RepeatMatch> repeatMatch(String password) {
   List<scoring.RepeatMatch> matches = [];
   RegExp greedy = new RegExp(r"(.+)\1+");
@@ -624,9 +613,7 @@ List<scoring.Match> sequenceMatch(String password) {
   return sorted(matches);
 }
 
-/**
- * regex matching
- */
+/// regex matching
 List<scoring.RegexMatch> regexMatch(password, [Map<String, RegExp> _regexen]) {
   if (_regexen == null) {
     _regexen = regexen;
@@ -656,28 +643,26 @@ List<scoring.RegexMatch> regexMatch(password, [Map<String, RegExp> _regexen]) {
   // ex for every alpha_lower match, also an alpha and alphanumeric match of the same [i,j].
   // ex for every recent_year match, also an alphanumeric match and digits match.
   //# use precedence to filter these redundancies out.
-  Map<String, Object> precedence_map = {}; // maps from 'i-j' to current highest precedence
+  Map<String, Object> precedenceMap = {}; // maps from 'i-j' to current highest precedence
   String getKey(scoring.Match match) => "${match.i}-${match.j}";
   int higestPrecedence;
   for (scoring.RegexMatch match in matches) {
     String key = getKey(match);
     int precedence = regexPrecedence[match.regexName];
-    if (precedence_map.containsKey(key)) {
-      higestPrecedence = precedence_map[key];
+    if (precedenceMap.containsKey(key)) {
+      higestPrecedence = precedenceMap[key];
       if (higestPrecedence > precedence) {
         continue;
       }
     }
-    precedence_map[key] = precedence;
+    precedenceMap[key] = precedence;
   }
   return sorted(new List.from(matches.where((scoring.RegexMatch match) {
-    return (precedence_map[getKey(match)] == regexPrecedence[match.regexName]);
+    return (precedenceMap[getKey(match)] == regexPrecedence[match.regexName]);
   })));
 }
 
-/**
- * date matching
- */
+/// date matching
 List<scoring.Match> dateMatch(String password) {
   // a "date" is recognized as:
   // any 3-tuple that starts or ends with a 2- or 4-digit year,
@@ -741,7 +726,7 @@ List<scoring.Match> dateMatch(String password) {
       _DayMonthYear bestCandidate;
 
       int metric(candidate) => (candidate.year - scoring.referenceYear).abs();
-      int minDistance = null;
+      int minDistance;
       for (_DayMonthYear candidate in candidates) {
         int distance = metric(candidate);
 
@@ -895,7 +880,8 @@ class _DayMonth {
 
   _DayMonth({this.day, this.month});
 
-  toString() => "$month/$day";
+  @override
+  String toString() => "$month/$day";
 }
 
 class _DayMonthYear extends _DayMonth {
@@ -903,7 +889,8 @@ class _DayMonthYear extends _DayMonth {
 
   _DayMonthYear({int day, int month, this.year}) : super(day: day, month: month);
 
-  toString() => "$year/${super.toString()}";
+  @override
+  String toString() => "$year/${super.toString()}";
 }
 
 _DayMonth mapIntsToDm(List<int> ints) {

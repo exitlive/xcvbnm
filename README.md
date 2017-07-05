@@ -3,7 +3,9 @@
 This is a dart port of the great [dropbox/zxcvbn](https://github.com/dropbox/zxcvbn) library, a realistic password strength 
 estimator.
 
-**Please note, that this is currently in development.**
+This library is strong mode compliant.
+
+**Please note, that library did not port all functionality but is already used in production.**
 
 ## Usage
 

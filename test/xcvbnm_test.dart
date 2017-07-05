@@ -14,7 +14,7 @@ void main() {
     });
     test('test passwords', () async {
       // Just validate this again some sample passwords
-      var test_passwords = [
+      var testPasswords = [
         r'zxcvbn',
         r'qwER43@!',
         r'Tr0ub4dour&3',
@@ -51,7 +51,7 @@ void main() {
         r'Ba9ZyWABu99[BK#6MBgbH88Tofv)vs$w',
       ];
 
-      for (String password in test_passwords) {
+      for (String password in testPasswords) {
         var result = xcvbnm.estimate(password);
         expect(result, isNotNull);
       }

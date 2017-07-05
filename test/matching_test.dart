@@ -7,7 +7,7 @@ import "package:xcvbnm/src/scoring.dart" as scoring;
 import "dart:core" hide Match;
 import "dart:core" as core;
 
-main() {
+void main() {
   test('matching utils', () {
     var chrMap, dividend, divisor, lst, lst1, lst2, m1, m2, m3, m4, m5, m6, map, msg, remainder, result, string;
     expect(empty([]), isTrue, reason: ".empty returns true for an empty array");
@@ -102,6 +102,7 @@ main() {
         ..i = i
         ..j = j;
     }
+
     var data = [m(5, 5), m(6, 7), m(2, 5), m(0, 0), m(2, 3), m(0, 3)];
     m1 = data[0];
     m2 = data[1];
@@ -132,18 +133,19 @@ main() {
     }
     return result;
   }
-  ;
 
-  checkFailed(Function callback, {String reason}) {
+  void checkFailed(Function callback, {String reason}) {
     bool success = false;
     try {
       callback();
       success = true;
-    } catch (e) {}
+    } catch (e) {
+      // Ignore
+    }
     expect(success, isFalse, reason: reason);
   }
 
-  checkMatches(String prefix, List<scoring.Match> matches, var patternNamesOrName, List<String> patterns,
+  void checkMatches(String prefix, List<scoring.Match> matches, var patternNamesOrName, List<String> patterns,
       List<List<int>> ijs, List<scoring.Match> expectedMatches) {
     int i, j, k;
     scoring.Match match;
@@ -274,11 +276,10 @@ main() {
           expect(foundMatch.regexMatch, expectedMatch.regexMatch, reason: msg);
         }
       } else {
-        throw "not supported yet";
+        throw new UnsupportedError("Match type not supported.");
       }
     }
   }
-  ;
 
   test('genWps', () {
     // dart only test - not present in original implementation
@@ -315,12 +316,12 @@ main() {
     List<scoring.Match> dm(pw) {
       return dictionaryMatch(pw, testDicts);
     }
-    ;
+
     matches = dm('motherboard');
     patterns = ['mother', 'motherboard', 'board'];
     msg = "matches words that contain other words";
 
-    ndm(String matchedWord, int rank, String dictionaryName) =>
+    scoring.DictionaryMatch ndm(String matchedWord, int rank, String dictionaryName) =>
         new scoring.DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
 
     checkMatches(msg, matches, 'dictionary', patterns, [
@@ -447,7 +448,8 @@ main() {
 
     setUserInputDictionary(['foo', 'bar']);
     matches = dictionaryMatch('foobar');
-    matches = new List.from(matches.where((scoring.DictionaryMatch match) => match.dictionaryName == "user_inputs"));
+    matches = new List.from(
+        matches.where((scoring.Match match) => (match as scoring.DictionaryMatch).dictionaryName == "user_inputs"));
     msg = "matches with provided user input dictionary";
     checkMatches(msg, matches, 'dictionary', [
       'foo',
@@ -472,7 +474,7 @@ main() {
     String password = "0123456879";
     matches = reverseDictionaryMatch(password, testDicts);
     msg = 'matches against reversed words';
-    ndm(String matchedWord, bool reversed, int rank, String dictionaryName) =>
+    scoring.DictionaryMatch ndm(String matchedWord, bool reversed, int rank, String dictionaryName) =>
         new scoring.DictionaryMatch(matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
 
     checkMatches(msg, matches, 'dictionary', [
@@ -497,15 +499,13 @@ main() {
           [2, 1],
           null,
           [],
-          [2],
-          4
+          [2]
         ]),
         [
           [],
           [1, 3],
           [2],
           [2, 1],
-          4,
           [4, 2],
           [4, 5],
           null
@@ -599,10 +599,7 @@ main() {
       'words2': {'cgo': 1}
     };
 
-    lm(pw) {
-      return l33tMatch(pw, dicts, testTable);
-    }
-    ;
+    List<scoring.DictionaryMatch> lm(pw) => l33tMatch(pw, dicts, testTable);
 
     expect(lm(''), [], reason: "doesn't match ''");
     expect(lm('password'), [], reason: "doesn't match pure dictionary words");
@@ -658,7 +655,7 @@ main() {
       ]);
     });
 
-    ndm(bool l33t, Map sub, String matchedWord, int rank, String dictionaryName) => new scoring.DictionaryMatch(
+    scoring.DictionaryMatch ndm(bool l33t, Map sub, String matchedWord, int rank, String dictionaryName) => new scoring.DictionaryMatch(
         l33t: l33t, sub: sub, matchedWord: matchedWord, rank: rank, dictionaryName: dictionaryName);
     checkMatches("matches against overlapping l33t patterns", lm('@a(go{G0'), 'dictionary', [
       '@a(',
@@ -697,7 +694,7 @@ main() {
     String pattern = '6tfGHJ';
     List<scoring.Match> matches = spatialMatch("rz!${pattern}%z", _graphs);
 
-    nsm(String graph, int turns, int shiftedCount) =>
+    scoring.SpatialMatch nsm(String graph, int turns, int shiftedCount) =>
         new scoring.SpatialMatch(graph: graph, turns: turns, shiftedCount: shiftedCount);
     String msg = "matches against spatial patterns surrounded by non-spatial patterns";
     checkMatches(msg, matches, 'spatial', [
@@ -772,7 +769,7 @@ main() {
     List<scoring.Match> matches = sequenceMatch('abcbabc');
     String msg = "matches overlapping patterns";
 
-    nsm(bool ascending, [String sequenceName]) =>
+    scoring.SequenceMatch nsm(bool ascending, [String sequenceName]) =>
         new scoring.SequenceMatch(ascending: ascending, sequenceName: sequenceName);
     checkMatches(msg, matches, 'sequence', [
       'abc',
@@ -893,7 +890,7 @@ main() {
       expect(repeatMatch(password), [], reason: "doesn't match length-${password.length} repeat patterns");
     }
 
-    nrm(String baseToken) => new scoring.RepeatMatch(baseToken: baseToken);
+    scoring.RepeatMatch nrm(String baseToken) => new scoring.RepeatMatch(baseToken: baseToken);
 
     // test single-character repeats
     List prefixes = ['@', 'y4@'];
@@ -1041,7 +1038,7 @@ main() {
     List<scoring.DateMatch> matches;
     String msg;
 
-    ndm(String separator, int year, [int month, int day]) =>
+    scoring.DateMatch ndm(String separator, int year, [int month, int day]) =>
         new scoring.DateMatch(separator: separator, year: year, month: month, day: day);
 
     for (String sep in ['', ' ', '-', '/', '\\', '_', '.']) {

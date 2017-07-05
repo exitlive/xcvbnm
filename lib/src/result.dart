@@ -2,7 +2,7 @@ library xcvbnm.result;
 
 import 'package:xcvbnm/src/scoring.dart' as scoring;
 
-/// [Xcvbnm] estimate result
+/// `Xcvbnm` estimate result
 class Result {
   String password;
 

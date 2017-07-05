@@ -38,15 +38,12 @@ num lg(num n) {
   return math.log(n) / math.log(2);
 }
 
-/**
- * threat model -- stolen hash catastrophe scenario
- *
- * passwords are stored as salted hashes, different random salt per user.
- *   (making rainbow attacks infeasable.)
- * hashes and salts were stolen. attacker is guessing passwords at max rate.
- * attacker has several CPUs at their disposal.
- */
-
+/// threat model -- stolen hash catastrophe scenario
+///
+/// passwords are stored as salted hashes, different random salt per user.
+///   (making rainbow attacks infeasable.)
+/// hashes and salts were stolen. attacker is guessing passwords at max rate.
+/// attacker has several CPUs at their disposal.
 num entropyToCrackTime(num entropy) {
   return .5 * math.pow(2, entropy) * _secondsPerGuess; // .5 for average vs total
 }
@@ -194,7 +191,7 @@ class Match {
   int i;
   int j;
 
-  toJson() {
+  Map toJson() {
     Map map = {'pattern': pattern, 'token': token, 'entropy': entropy, 'base_entropy': baseEntropy, 'i': i, 'j': j};
     for (var key in map.keys.toList()) {
       // Remove null values from map
@@ -203,7 +200,8 @@ class Match {
     return map;
   }
 
-  toString() => toJson().toString();
+  @override
+  String toString() => toJson().toString();
 }
 
 class SequenceMatch extends Match {
@@ -216,7 +214,7 @@ class SequenceMatch extends Match {
   bool ascending;
 
   @override
-  toJson() {
+  Map toJson() {
     Map map = super.toJson();
     if (sequenceName != null) {
       map["sequence_name"] = sequenceName;
@@ -240,7 +238,7 @@ class RepeatMatch extends Match {
       : super(pattern: 'repeat', i: i, j: j, token: token, baseEntropy: baseEntropy);
 
   @override
-  toJson() {
+  Map toJson() {
     Map map = super.toJson();
     if (baseToken != null) {
       map["base_token"] = baseToken;
@@ -266,7 +264,7 @@ class SpatialMatch extends Match {
       : super(pattern: 'spatial', i: i, j: j, token: token);
 
   @override
-  toJson() {
+  Map toJson() {
     Map map = super.toJson();
     if (graph != null) {
       map["graph"] = graph;
@@ -290,7 +288,7 @@ class RegexMatch extends Match {
       : super(pattern: 'regex', i: i, j: j, token: token);
 
   @override
-  toJson() {
+  Map toJson() {
     Map map = super.toJson();
     if (regexName != null) {
       map["regexName"] = regexName;
@@ -334,25 +332,35 @@ class DateMatch extends Match {
   }
 }
 
-/*
- * entropy calcs -- one function per match pattern
- */
-
-typedef num _EntropyFunction(Match match);
-
+/// entropy calcs -- one function per match pattern
 num calcEntropy(Match match) {
   if (match.entropy != null) {
     return match.entropy;
   }
-  Map<String, _EntropyFunction> entropy_functions = {
-    "dictionary": dictionaryEntropy,
-    "spatial": spatialEntropy,
-    "repeat": repeatEntropy,
-    "sequence": sequenceEntropy,
-    "regex": regexEntropy,
-    "date": dateEntropy
-  };
-  return match.entropy = entropy_functions[match.pattern](match);
+  num entropy;
+
+  switch (match.pattern) {
+    case 'dictionary':
+      entropy = dictionaryEntropy(match);
+      break;
+    case 'spatial':
+      entropy = spatialEntropy(match);
+      break;
+    case 'repeat':
+      entropy = repeatEntropy(match);
+      break;
+    case 'sequence':
+      entropy = sequenceEntropy(match);
+      break;
+    case 'regex':
+      entropy = regexEntropy(match);
+      break;
+    case 'date':
+      entropy = dateEntropy(match);
+      break;
+  }
+
+  return match.entropy = entropy;
 }
 
 num repeatEntropy(RepeatMatch match) {
@@ -399,7 +407,7 @@ num regexEntropy(RegexMatch match) {
         // conservative estimate of year space: num years from REFERENCE_YEAR.
         // if year is close to REFERENCE_YEAR, estimate a year space of MIN_YEAR_SPACE.
         yearSpace = (int.parse(match.regexMatch[0]) - referenceYear).abs();
-        yearSpace = math.max(yearSpace, minYearSpace);
+        yearSpace = math.max<int>(yearSpace, minYearSpace);
         return lg(yearSpace);
     }
   }
@@ -422,8 +430,9 @@ num dateEntropy(DateMatch match) {
   return entropy;
 }
 
-_calcAverageDegree(Map graph) {
-  var average, k, key, n, neighbors;
+num _calcAverageDegree(Map graph) {
+  num average;
+  var k, key, n, neighbors;
   average = 0;
   for (key in graph.keys) {
     neighbors = graph[key];
@@ -492,7 +501,7 @@ num spatialEntropy(SpatialMatch match) {
   tokenLength = match.token.length;
   t = match.turns;
   for (int i = 2; i <= tokenLength; i++) {
-    possibleTurns = math.min(t, i - 1);
+    possibleTurns = math.min<int>(t, i - 1);
     for (int j = 1; j <= possibleTurns; j++) {
       possibilities += nCk(i - 1, j - 1) * s * math.pow(d, j);
     }
@@ -507,7 +516,7 @@ num spatialEntropy(SpatialMatch match) {
       entropy += 1;
     } else {
       possibilities = 0;
-      for (int i = 1; i <= math.min(sc, uc); i++) {
+      for (int i = 1; i <= math.min<int>(sc, uc); i++) {
         possibilities += nCk(sc + uc, i);
       }
       entropy += lg(possibilities);
@@ -538,7 +547,7 @@ class DictionaryMatch extends Match {
   }
 
   @override
-  toJson() {
+  Map toJson() {
     Map map = super.toJson();
     if (reversed != null) {
       map["reversed"] = reversed;
@@ -674,12 +683,10 @@ class BruteforceMatch extends Match {
       : super(pattern: "bruteforce", i: i, j: j, token: token, entropy: entropy);
 }
 
-/**
- * minimum entropy search
- *
- * takes a list of overlapping matches, returns the non-overlapping sublist with
- * minimum entropy. O(nm) dp alg for length-n password with m candidate matches.
- */
+/// minimum entropy search
+///
+/// takes a list of overlapping matches, returns the non-overlapping sublist with
+/// minimum entropy. O(nm) dp alg for length-n password with m candidate matches.
 Result minimumEntropyMatchSequence(String password, List<Match> matches) {
   num candidateEntropy, crackTime, minEntropy;
   int i, j, k;
@@ -687,11 +694,11 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
   Match match;
   List<Match> matchSequence, matchSequenceCopy;
 
-  _safeArrayValue(List array, int index) {
+  num _safeArrayValue(List<num> array, int index) {
     if ((index < 0) || (index >= array.length)) {
       return 0;
     }
-    var value = array[index];
+    num value = array[index];
     if (value == null) {
       value = 0;
     }
@@ -700,7 +707,7 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
 
   int bruteforceCardinality = calcBruteforceCardinality(password); // e.g. 26 for lowercase
   int passwordLength = password.length;
-  upToK = new List(passwordLength + 1); //  minimum entropy up to k.
+  upToK = new List<num>(passwordLength + 1); //  minimum entropy up to k.
   // for the optimal seq of matches up to k, backpointers holds the final match (match.j == k).
   // null means the sequence ends w/ a brute-force character.
   List<Match> backpointers = new List(passwordLength + 1);
@@ -743,14 +750,12 @@ Result minimumEntropyMatchSequence(String password, List<Match> matches) {
   // fill in the blanks between pattern matches with bruteforce "matches"
   // that way the match sequence fully covers the password:
   // match1.j == match2.i - 1 for every adjacent match1, match2.
-  makeBruteforceMatch(i, j) {
-    return new BruteforceMatch(
-        i: i,
-        j: j,
-        token: password.substring(i, j + 1),
-        entropy: lg(math.pow(bruteforceCardinality, j - i + 1)),
-        cardinality: bruteforceCardinality);
-  }
+  BruteforceMatch makeBruteforceMatch(i, j) => new BruteforceMatch(
+      i: i,
+      j: j,
+      token: password.substring(i, j + 1),
+      entropy: lg(math.pow(bruteforceCardinality, j - i + 1)),
+      cardinality: bruteforceCardinality);
 
   k = 0;
   matchSequenceCopy = [];

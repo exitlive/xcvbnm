@@ -33,7 +33,7 @@ class Feedback {
     getFeedback(score, sequenceCopy);
   }
 
-  getFeedback(int score, List<scoring.Match> sequence) {
+  void getFeedback(int score, List<scoring.Match> sequence) {
     // starting feedback
     sequence.removeWhere((match) => match.token == null);
     if (sequence?.length == 0) return;
@@ -52,7 +52,7 @@ class Feedback {
     getMatchFeedback(longestMatch, sequence.length == 1);
   }
 
-  getMatchFeedback(match, isSoleMatch) {
+  void getMatchFeedback(match, isSoleMatch) {
     switch (match.pattern) {
       case 'dictionary':
         getDictionaryMatchFeedback(match, isSoleMatch);
@@ -81,7 +81,7 @@ class Feedback {
     }
   }
 
-  getDictionaryMatchFeedback(scoring.DictionaryMatch match, isSoleMatch) {
+  void getDictionaryMatchFeedback(scoring.DictionaryMatch match, isSoleMatch) {
     bool l33t = match.l33t == true;
     bool reversed = match.reversed == true;
     if (match.dictionaryName == 'passwords') {

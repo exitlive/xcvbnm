@@ -8,7 +8,7 @@ class Xcvbnm {
   /// Estimate the strenght of password
   /// Returns a [Result] with the data of the analysis
   ///
-  /// The optional [user_inputs] argument is an array of strings that zxcvbn will treat as an extra dictionary.
+  /// The optional [userInputs] argument is an array of strings that zxcvbn will treat as an extra dictionary.
   /// This can be whatever list of strings you like, but is meant for user inputs from other fields of the form,
   /// like name and email. That way a password that includes a user's personal information can be heavily penalized.
   /// This list is also good for site-specific vocabulary

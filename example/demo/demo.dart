@@ -8,8 +8,8 @@ const String _HELP = 'help';
 const String _MATCH = 'match';
 const String _DEPENDENCY = 'dependency';
 
-main() {
-  int maxMatchToDisplay = null;
+void main() {
+  int maxMatchToDisplay;
 
   // good sample of data
   String testPasswords =
@@ -17,9 +17,9 @@ main() {
 
   List<String> passwords = testPasswords.split('\n');
 
-  getResultEl(String password) {
+  DivElement getResultEl(String password) {
     // The only call
-    Result result = xcvbnm(password);
+    Result result = new Xcvbnm().estimate(password);
 
     DivElement resultEl = new DivElement()..classes.add('app-result');
     List<String> lines = [

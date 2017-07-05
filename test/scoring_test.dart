@@ -7,7 +7,7 @@ import 'package:xcvbnm/src/matching.dart' as matching;
 import 'package:xcvbnm/xcvbnm.dart' as xcvbnm;
 import 'dart:core' hide Match;
 
-main() {
+void main() {
   const num epsilon = 1e-10;
 
   test('nCk', () {
@@ -139,6 +139,7 @@ main() {
     Match m(i, j, entropy) {
       return new Match(i: i, j: j, entropy: entropy);
     }
+
     password = '0123456789';
     cardinality = 10;
 
